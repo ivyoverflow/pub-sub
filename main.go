@@ -31,19 +31,18 @@ func (ps *publisherSubscriber) publish(topic string, message interface{}) {
 		go func(channel chan interface{}) {
 			channel <- message
 		}(channel)
-		fmt.Println(channel)
 	}
 }
 
 // subscribe func adds a new subscriber to the transmitted topic.
-func (ps *publisherSubscriber) subscribe(topic string) {
+func (ps *publisherSubscriber) subscribe(topic string) chan interface{} {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
 
 	channel := make(chan interface{}, 1)
 	ps.subs[topic] = append(ps.subs[topic], channel)
 
-	fmt.Println(ps.subs[topic])
+	return channel
 }
 
 // close func closes all channels for all subscribers.
@@ -64,11 +63,20 @@ func (ps *publisherSubscriber) close() {
 func main() {
 	pubSub := newPublisherSubscriber()
 
-	pubSub.subscribe("news")
+	channel := make(chan interface{})
+	channel = pubSub.subscribe("news")
 	pubSub.publish("news", "Ohhhh...")
+	fmt.Println(<-channel)
+	pubSub.publish("news", "Uhhhh...")
+	fmt.Println(<-channel)
+	pubSub.publish("news", "Ghhhh...")
+	fmt.Println(<-channel)
 
-	pubSub.subscribe("games")
-	pubSub.publish("games", "Uhhhh...")
-	pubSub.publish("games", "Fuhhh...")
-	pubSub.publish("games", "Guhhh...")
+	channel = pubSub.subscribe("games")
+	pubSub.publish("games", "Jhhhh...")
+	fmt.Println(<-channel)
+	pubSub.publish("games", "Ihhhh...")
+	fmt.Println(<-channel)
+	pubSub.publish("games", "Lhhhh...")
+	fmt.Println(<-channel)
 }
