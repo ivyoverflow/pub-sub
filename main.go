@@ -1,6 +1,8 @@
 package main
 
-import "sync"
+import (
+	"sync"
+)
 
 // publisherI interface describes all methods for publisher.
 type publisherI interface {
@@ -10,7 +12,7 @@ type publisherI interface {
 
 // subscriberI interface describes all methods for subscriber.
 type subscriberI interface {
-	subscribe(topic string) <-chan interface{}
+	subscribe(topic string)
 }
 
 // publisher struct implements all methods from publisherI interface.
@@ -78,14 +80,12 @@ func newSubscriber() *subscriber {
 }
 
 // subscribe func adds a new subscriber to the transmitted topic.
-func (sub *subscriber) subscribe(topic string) <-chan interface{} {
+func (sub *subscriber) subscribe(topic string) {
 	sub.pub.mutex.Lock()
 	defer sub.pub.mutex.Unlock()
 
 	channel := make(chan interface{}, 1)
 	sub.pub.subs[topic] = append(sub.pub.subs[topic], channel)
-
-	return channel
 }
 
 // newPubSub returns configured pubSub object.
@@ -99,16 +99,16 @@ func newPubSub() *pubSub {
 func main() {
 	pubSub := newPubSub()
 
+	pubSub.subscribe("news")
+	pubSub.subscribe("news")
+	pubSub.subscribe("news")
+
+	pubSub.subscribe("games")
+	pubSub.subscribe("games")
+	pubSub.subscribe("games")
+
 	pubSub.publish("news", "...")
 	pubSub.publish("sports", "...")
 	pubSub.publish("games", "...")
 	pubSub.publish("movies", "...")
-
-	pubSub.subscribe("news")
-	pubSub.subscribe("news")
-	pubSub.subscribe("news")
-
-	pubSub.subscribe("games")
-	pubSub.subscribe("games")
-	pubSub.subscribe("games")
 }
