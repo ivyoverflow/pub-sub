@@ -1,4 +1,4 @@
-package pubsub
+package main
 
 import "sync"
 
@@ -94,4 +94,21 @@ func newPubSub() *pubSub {
 		publisherI:  newPublisher(),
 		subscriberI: newSubscriber(),
 	}
+}
+
+func main() {
+	pubSub := newPubSub()
+
+	pubSub.publish("news", "...")
+	pubSub.publish("sports", "...")
+	pubSub.publish("games", "...")
+	pubSub.publish("movies", "...")
+
+	pubSub.subscribe("news")
+	pubSub.subscribe("news")
+	pubSub.subscribe("news")
+
+	pubSub.subscribe("games")
+	pubSub.subscribe("games")
+	pubSub.subscribe("games")
 }
