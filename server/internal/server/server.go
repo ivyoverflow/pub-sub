@@ -8,6 +8,7 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// Run launches the server.
 func Run() error {
 	pubSub := service.NewPublisherSubscriber()
 	publisherHandler := handler.NewPublisherHandler(pubSub)

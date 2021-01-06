@@ -11,14 +11,17 @@ import (
 	"github.com/ivyoverflow/internship/pubsub/server/internal/model"
 )
 
+// PublisherHandler struct contains all handlers for publisher.
 type PublisherHandler struct {
 	pubSub *service.PublisherSubscriber
 }
 
+// NewPublisherHandler returns a new configured PublisherHandler object.
 func NewPublisherHandler(pubSub *service.PublisherSubscriber) *PublisherHandler {
 	return &PublisherHandler{pubSub}
 }
 
+// Publish func processes publisher/publish route.
 func (handler *PublisherHandler) Publish(ws *websocket.Conn) {
 	var request *model.PublishRequest
 	if err := websocket.JSON.Receive(ws, &request); err != nil {

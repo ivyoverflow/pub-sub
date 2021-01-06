@@ -4,12 +4,14 @@ import (
 	"sync"
 )
 
+// PublisherSubscriber implements Publish-Subscriber pattern methods.
 type PublisherSubscriber struct {
 	mutex  sync.RWMutex
 	subs   map[string][]chan interface{}
 	closed bool
 }
 
+// NewPublisherSubscriber returns a new PublishSubscriber object.
 func NewPublisherSubscriber() *PublisherSubscriber {
 	ps := &PublisherSubscriber{}
 	ps.subs = make(map[string][]chan interface{})
@@ -17,7 +19,7 @@ func NewPublisherSubscriber() *PublisherSubscriber {
 	return ps
 }
 
-// publish func writes a message to the transmitted topic.
+// Publish func writes a message to the transmitted topic.
 func (ps *PublisherSubscriber) Publish(topic string, message interface{}) {
 	ps.mutex.RLock()
 	defer ps.mutex.RUnlock()
@@ -33,7 +35,7 @@ func (ps *PublisherSubscriber) Publish(topic string, message interface{}) {
 	}
 }
 
-// subscribe func adds a new subscriber to the transmitted topic.
+// Subscribe func adds a new subscriber to the transmitted topic.
 func (ps *PublisherSubscriber) Subscribe(topic string) chan interface{} {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
@@ -44,7 +46,7 @@ func (ps *PublisherSubscriber) Subscribe(topic string) chan interface{} {
 	return channel
 }
 
-// close func closes all channels for all subscribers.
+// Close func closes all channels for all subscribers.
 func (ps *PublisherSubscriber) Close() {
 	ps.mutex.Lock()
 	defer ps.mutex.Unlock()
