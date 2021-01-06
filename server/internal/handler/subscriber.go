@@ -23,8 +23,8 @@ func NewSubscriberHandler(pubSub *service.PublisherSubscriber) *SubscriberHandle
 
 // Subscribe func processes /user/subscribe route.
 func (handler *SubscriberHandler) Subscribe(ws *websocket.Conn) {
-	var request *model.SubscribeRequest
-	if err := websocket.JSON.Receive(ws, &request); err != nil {
+	request := &model.SubscribeRequest{}
+	if err := websocket.JSON.Receive(ws, request); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		fmt.Fprintf(ws, fmt.Sprintf(`{"error": {"statusCode: %d", "message: %s"}}`, http.StatusBadRequest, err.Error()))
 		return
@@ -37,6 +37,7 @@ func (handler *SubscriberHandler) Subscribe(ws *websocket.Conn) {
 
 	if err := websocket.JSON.Send(ws, response); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
+		fmt.Println("!!!!!!!!!")
 		fmt.Fprintf(ws, fmt.Sprintf(`{"error": {"statusCode: %d", "message: %s"}}`, http.StatusInternalServerError, err.Error()))
 		return
 	}

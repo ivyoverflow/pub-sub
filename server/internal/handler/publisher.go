@@ -23,12 +23,15 @@ func NewPublisherHandler(pubSub *service.PublisherSubscriber) *PublisherHandler 
 
 // Publish func processes publisher/publish route.
 func (handler *PublisherHandler) Publish(ws *websocket.Conn) {
-	var request *model.PublishRequest
-	if err := websocket.JSON.Receive(ws, &request); err != nil {
+	request := &model.PublishRequest{}
+	if err := websocket.JSON.Receive(ws, request); err != nil {
 		fmt.Printf("ERROR: %s", err.Error())
+		fmt.Println("!!!")
 		fmt.Fprintf(ws, fmt.Sprintf(`{"error": {"statusCode: %d", "message: %s"}}`, http.StatusBadRequest, err.Error()))
 		return
 	}
+
+	fmt.Println(request.Topic, request.Message)
 
 	handler.pubSub.Publish(request.Topic, request.Message)
 }
