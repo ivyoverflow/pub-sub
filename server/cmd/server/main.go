@@ -3,11 +3,18 @@ package main
 import (
 	"log"
 
-	"github.com/ivyoverflow/internship/pubsub/server/internal/server"
+	"github.com/ivyoverflow/pub-sub/server/internal/logger"
+	"github.com/ivyoverflow/pub-sub/server/internal/server"
 )
 
 func main() {
-	if err := server.Run(); err != nil {
+	logger, err := logger.NewLogger()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	server := server.NewServer()
+	if err := server.Run(logger); err != nil {
 		log.Fatal(err.Error())
 	}
 }

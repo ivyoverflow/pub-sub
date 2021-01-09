@@ -1,8 +1,6 @@
 package service
 
-import (
-	"sync"
-)
+import "sync"
 
 // PublisherSubscriber implements Publish-Subscriber pattern methods.
 type PublisherSubscriber struct {
@@ -44,19 +42,4 @@ func (ps *PublisherSubscriber) Subscribe(topic string) chan interface{} {
 	ps.subs[topic] = append(ps.subs[topic], channel)
 
 	return channel
-}
-
-// Close func closes all channels for all subscribers.
-func (ps *PublisherSubscriber) Close() {
-	ps.mutex.Lock()
-	defer ps.mutex.Unlock()
-
-	if !ps.closed {
-		ps.closed = true
-		for _, subs := range ps.subs {
-			for _, channel := range subs {
-				close(channel)
-			}
-		}
-	}
 }
