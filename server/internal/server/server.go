@@ -10,10 +10,12 @@ import (
 	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 
+// Server represents application server.
 type Server struct {
 	httpServer *http.Server
 }
 
+// NewServer returns a new configured Server object.
 func NewServer() *Server {
 	return &Server{
 		httpServer: &http.Server{
@@ -22,6 +24,7 @@ func NewServer() *Server {
 	}
 }
 
+// Run configures routes and starts the server.
 func (server *Server) Run(logger *logger.Logger) error {
 	publisherSubscriber := service.NewPublisherSubscriber()
 	publisherHandler := handler.NewPublisherHandler(publisherSubscriber, logger)

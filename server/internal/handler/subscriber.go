@@ -32,12 +32,11 @@ func (handler *SubscriberHandler) Subscribe(ws *websocket.Conn) {
 	}
 
 	messageChannel := handler.pubSub.Subscribe(request.Topic)
+	handler.logger.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
 	for message := range messageChannel {
 		response := &model.Response{
 			Message: message,
 		}
-
-		handler.logger.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
 
 		if err := websocket.JSON.Send(ws, response); err != nil {
 			handler.logger.Error(err.Error())

@@ -1,24 +1,35 @@
 package client
 
 import (
-	"fmt"
+	"net/http"
 
-	"github.com/ivyoverflow/internship/pubsub/client/internal/model"
+	"github.com/ivyoverflow/pub-sub/publisher/internal/handler"
+	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
 	"golang.org/x/net/websocket"
 )
 
-func Run() error {
-	ws, err := websocket.Dial("ws://localhost:8080/user/subscribe", "", "https://localhost:8080")
-	if err != nil {
-		return err
+// Client represents application client.
+type Client struct {
+	httpServer *http.Server
+}
+
+// NewClient returns a new configured Client object.
+func NewClient() *Client {
+	return &Client{
+		httpServer: &http.Server{
+			Addr: ":" + "3030",
+		},
 	}
+}
 
-	response := &model.Response{}
-	if err := websocket.JSON.Receive(ws, response); err != nil {
-		return err
-	}
+// Run configures routes and starts the server.
+func (client *Client) Run(logger *logger.Logger) error {
+	publisherHandler := handler.NewPublisherHandler(logger)
 
-	fmt.Println(response.Message)
+	mux := http.NewServeMux()
+	mux.Handle("/publish", websocket.Handler(publisherHandler.Publish))
 
-	return nil
+	client.httpServer.Handler = mux
+
+	return client.httpServer.ListenAndServe()
 }
