@@ -3,34 +3,36 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"os"
 
-	"github.com/ivyoverflow/pub-sub/server/internal/handler"
-	"github.com/ivyoverflow/pub-sub/server/internal/logger"
 	"golang.org/x/net/websocket"
 
+	"github.com/ivyoverflow/pub-sub/server/internal/config"
+	"github.com/ivyoverflow/pub-sub/server/internal/handler"
+	"github.com/ivyoverflow/pub-sub/server/internal/logger"
 	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
+	logger     *logger.Logger
 }
 
-// NewServer returns a new configured Server object.
-func NewServer() *Server {
+// New returns a new configured Server object.
+func New(cfg *config.Config, logger *logger.Logger) *Server {
 	return &Server{
 		httpServer: &http.Server{
-			Addr: fmt.Sprintf("%s:%s", os.Getenv("ADDR"), os.Getenv("PORT")),
+			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
 		},
+		logger: logger,
 	}
 }
 
 // Run configures routes and starts the server.
-func (server *Server) Run(logger *logger.Logger) error {
+func (server *Server) Run() error {
 	publisherSubscriber := service.NewPublisherSubscriber()
-	publisherHandler := handler.NewPublisherHandler(publisherSubscriber, logger)
-	subscriberHandler := handler.NewSubscriberHandler(publisherSubscriber, logger)
+	publisherHandler := handler.NewPublisher(publisherSubscriber, server.logger)
+	subscriberHandler := handler.NewSubscriber(publisherSubscriber, server.logger)
 
 	mux := http.NewServeMux()
 	mux.Handle("/publish", websocket.Handler(publisherHandler.Publish))
