@@ -1,6 +1,10 @@
 package logger
 
-import "go.uber.org/zap"
+import (
+	"log"
+
+	"go.uber.org/zap"
+)
 
 // Logger represents application logger.
 type Logger struct {
@@ -13,6 +17,12 @@ func New() (*Logger, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer func() {
+		if err = logger.Sync(); err != nil {
+			log.Fatal(err.Error())
+		}
+	}()
 
 	logger.Info("The logger is successfully configured")
 
