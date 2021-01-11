@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"log"
-
 	"go.uber.org/zap"
 )
 
@@ -17,12 +15,6 @@ func New() (*Logger, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	defer func() {
-		if err = logger.Sync(); err != nil {
-			log.Fatal(err.Error())
-		}
-	}()
 
 	logger.Info("The logger is successfully configured")
 
