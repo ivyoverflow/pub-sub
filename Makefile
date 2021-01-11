@@ -1,16 +1,11 @@
 .PHONY: server
 server:
-	cd server/ && \
-	go build -o build/server ./cmd/server/main.go && \
-	./build/server
+	sh server/scripts/build.sh
 
 .PHONY: client
 client:
-	cd client/ && \
-	go build -o build/client ./cmd/client/main.go && \
-	./build/client
+	sh client/scripts/build.sh
 
-.PHONY: clear
 clear:
 	rm -rf server/build/ && \
 	rm -rf client/build/

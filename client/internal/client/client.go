@@ -1,35 +1,45 @@
 package client
 
 import (
-	"net/http"
+	"fmt"
 
-	"github.com/ivyoverflow/pub-sub/publisher/internal/handler"
-	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
 	"golang.org/x/net/websocket"
+
+	"github.com/ivyoverflow/pub-sub/publisher/internal/config"
+	"github.com/ivyoverflow/pub-sub/publisher/internal/model"
 )
 
-// Client represents application client.
+// Client contains addr and port fields that will be used to connect to the server.
 type Client struct {
-	httpServer *http.Server
+	addr string
+	port string
 }
 
-// NewClient returns a new configured Client object.
-func NewClient() *Client {
+// New returns a new configured Client object.
+func New(cfg *config.Config) *Client {
 	return &Client{
-		httpServer: &http.Server{
-			Addr: ":" + "3030",
-		},
+		addr: cfg.Addr,
+		port: cfg.Port,
 	}
 }
 
-// Run configures routes and starts the server.
-func (client *Client) Run(logger *logger.Logger) error {
-	publisherHandler := handler.NewPublisherHandler(logger)
+// Dial connects to the server and sends a filled request.
+func (client *Client) Dial() error {
+	ws, err := websocket.Dial(fmt.Sprintf("ws://%s:%s/publish", client.addr, client.port), "", fmt.Sprintf("http://%s:%s", client.addr, client.port))
+	if err != nil {
+		return err
+	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/publish", websocket.Handler(publisherHandler.Publish))
+	defer ws.Close()
 
-	client.httpServer.Handler = mux
+	request := &model.PublishRequest{
+		Topic:   "news",
+		Message: "As the world begins its vaccination push, delayed rollouts draw criticism and concern",
+	}
 
-	return client.httpServer.ListenAndServe()
+	if err = websocket.JSON.Send(ws, request); err != nil {
+		return err
+	}
+
+	return nil
 }
