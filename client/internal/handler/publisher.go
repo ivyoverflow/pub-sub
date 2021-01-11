@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
 	"github.com/ivyoverflow/pub-sub/publisher/internal/model"
@@ -22,7 +23,7 @@ func NewPublisherHandler(logger *logger.Logger) *PublisherHandler {
 // Publish connects to the server and sends a request.
 func (handler *PublisherHandler) Publish(ws *websocket.Conn) {
 	// connect to our server.
-	serverWs, err := websocket.Dial("ws://localhost:8080/publish", "", "http://localhost:8080")
+	serverWs, err := websocket.Dial(fmt.Sprintf("ws://%s:%s", os.Getenv("ADDR"), os.Getenv("PORT")), "", fmt.Sprintf("http://%s:%s", os.Getenv("ADDR"), os.Getenv("PORT")))
 	for {
 		request := &model.PublishRequest{}
 		if err := websocket.JSON.Receive(ws, request); err != nil {

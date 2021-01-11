@@ -1,7 +1,9 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/ivyoverflow/pub-sub/server/internal/handler"
 	"github.com/ivyoverflow/pub-sub/server/internal/logger"
@@ -19,7 +21,7 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		httpServer: &http.Server{
-			Addr: ":" + "8080",
+			Addr: fmt.Sprintf("%s:%s", os.Getenv("ADDR"), os.Getenv("PORT")),
 		},
 	}
 }
