@@ -22,30 +22,32 @@ func NewSubscriber(pubSub *service.PublisherSubscriber, logger *logger.Logger) *
 	return &Subscriber{pubSub, logger}
 }
 
-// Subscribe func processes /user/subscribe route.
+// Subscribe processes /subscribe route.
 func (handler *Subscriber) Subscribe(ws *websocket.Conn) {
-	request := &model.SubscribeRequest{}
-	if err := websocket.JSON.Receive(ws, request); err != nil {
-		handler.logger.Error(err.Error())
-		fmt.Fprintf(ws, `{"error": {"statusCode: %d", "message: %s"}}`, http.StatusBadRequest, err.Error())
-
-		return
-	}
-
-	messageChannel := handler.pubSub.Subscribe(request.Topic)
-	handler.logger.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
-	for message := range messageChannel {
-		response := &model.Response{
-			Message: message,
-		}
-
-		if err := websocket.JSON.Send(ws, response); err != nil {
+	for {
+		request := &model.SubscribeRequest{}
+		if err := websocket.JSON.Receive(ws, request); err != nil {
 			handler.logger.Error(err.Error())
-			fmt.Fprintf(ws, `{"error": {"statusCode: %d", "message: %s"}}`, http.StatusInternalServerError, err.Error())
+			fmt.Fprintf(ws, `{"error": {"statusCode: %d", "message: %s"}}`, http.StatusBadRequest, err.Error())
 
 			return
 		}
 
-		handler.logger.Debug(fmt.Sprintf("The message <<< %s >>> sends to the subscribed users", response.Message))
+		channel := handler.pubSub.Subscribe(request.Topic)
+		handler.logger.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
+		go func(channel chan interface{}) {
+			for message := range channel {
+				response := &model.Response{
+					Message: message,
+				}
+
+				if err := websocket.JSON.Send(ws, response); err != nil {
+					handler.logger.Error(err.Error())
+					fmt.Fprintf(ws, `{"error": {"statusCode: %d", "message: %s"}}`, http.StatusInternalServerError, err.Error())
+
+					return
+				}
+			}
+		}(channel)
 	}
 }

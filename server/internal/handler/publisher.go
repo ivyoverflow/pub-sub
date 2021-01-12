@@ -22,7 +22,7 @@ func NewPublisher(pubSub *service.PublisherSubscriber, logger *logger.Logger) *P
 	return &Publisher{pubSub, logger}
 }
 
-// Publish func processes publisher/publish route.
+// Publish processes /publish route.
 func (handler *Publisher) Publish(ws *websocket.Conn) {
 	for {
 		request := &model.PublishRequest{}

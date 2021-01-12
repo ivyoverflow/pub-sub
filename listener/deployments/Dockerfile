@@ -7,7 +7,7 @@ COPY ./ ./
 RUN apt-get update
 
 RUN go mod download
-RUN go build -o build/client ./cmd/client/main.go
+RUN go build -o build/publisher ./cmd/publisher/main.go
 
-CMD [ "./build/client" ]
+CMD [ "./build/publisher" ]
 

@@ -20,7 +20,7 @@ func main() {
 		return
 	}
 
-	client := client.New(cfg)
+	client := client.New(cfg, logger)
 	if err = client.Dial(); err != nil {
 		logger.Fatal(err.Error())
 	}
