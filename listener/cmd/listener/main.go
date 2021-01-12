@@ -38,6 +38,7 @@ func main() {
 		logger.Fatal(err.Error())
 
 	}
+
 	for {
 		response := &model.Response{}
 		if err := websocket.JSON.Receive(ws, response); err != nil {

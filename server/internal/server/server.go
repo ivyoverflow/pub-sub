@@ -35,7 +35,7 @@ func (server *Server) Run() error {
 	subscriberHandler := handler.NewSubscriber(publisherSubscriber, server.logger)
 
 	mux := http.NewServeMux()
-	mux.Handle("/publish", websocket.Handler(publisherHandler.Publish))
+	mux.HandleFunc("/publish", publisherHandler.Publish)
 	mux.Handle("/subscribe", websocket.Handler(subscriberHandler.Subscribe))
 
 	server.httpServer.Handler = mux
