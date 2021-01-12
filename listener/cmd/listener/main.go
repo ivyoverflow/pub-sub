@@ -30,15 +30,15 @@ func main() {
 
 	defer ws.Close()
 
+	request := &model.Request{
+		Topic: "news",
+	}
+
+	if err := websocket.JSON.Send(ws, request); err != nil {
+		logger.Fatal(err.Error())
+
+	}
 	for {
-		request := &model.Request{
-			Topic: "news",
-		}
-
-		if err := websocket.JSON.Send(ws, request); err != nil {
-			logger.Fatal(err.Error())
-
-		}
 		response := &model.Response{}
 		if err := websocket.JSON.Receive(ws, response); err != nil {
 			logger.Fatal(err.Error())
