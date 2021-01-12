@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
-	"github.com/ivyoverflow/pub-sub/publisher/internal/client"
+	"golang.org/x/net/websocket"
+
 	"github.com/ivyoverflow/pub-sub/publisher/internal/config"
 	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
+	"github.com/ivyoverflow/pub-sub/publisher/internal/model"
 )
 
 func main() {
@@ -20,8 +23,27 @@ func main() {
 		return
 	}
 
-	client := client.New(cfg, logger)
-	if err = client.Dial(); err != nil {
+	ws, err := websocket.Dial(fmt.Sprintf("ws://%s:%s/subscribe", cfg.Addr, cfg.Port), "", fmt.Sprintf("http://%s:%s", cfg.Addr, cfg.Port))
+	if err != nil {
 		logger.Fatal(err.Error())
+	}
+
+	defer ws.Close()
+
+	for {
+		request := &model.Request{
+			Topic: "news",
+		}
+
+		if err := websocket.JSON.Send(ws, request); err != nil {
+			logger.Fatal(err.Error())
+
+		}
+		response := &model.Response{}
+		if err := websocket.JSON.Receive(ws, response); err != nil {
+			logger.Fatal(err.Error())
+		}
+
+		logger.Info(fmt.Sprintf("Client received <<< %s >> message", response.Message))
 	}
 }
