@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"golang.org/x/net/websocket"
 
@@ -12,20 +11,20 @@ import (
 )
 
 func main() {
-	logger, err := logger.New()
+	log, err := logger.New()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
 	cfg := config.New()
 	if cfg.Addr == "" || cfg.Port == "" {
-		logger.Fatal("Environment variables ADDR and PORT not found")
+		log.Fatal("Environment variables ADDR and PORT not found")
 		return
 	}
 
 	ws, err := websocket.Dial(fmt.Sprintf("ws://%s:%s/subscribe", cfg.Addr, cfg.Port), "", fmt.Sprintf("http://%s:%s", cfg.Addr, cfg.Port))
 	if err != nil {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	defer ws.Close()
@@ -35,16 +34,15 @@ func main() {
 	}
 
 	if err := websocket.JSON.Send(ws, request); err != nil {
-		logger.Fatal(err.Error())
-
+		log.Error(err.Error())
 	}
 
 	for {
 		response := &model.Response{}
 		if err := websocket.JSON.Receive(ws, response); err != nil {
-			logger.Fatal(err.Error())
+			log.Error(err.Error())
 		}
 
-		logger.Info(fmt.Sprintf("Client received <<< %s >> message", response.Message))
+		log.Info(fmt.Sprintf("Client received <<< %s >> message", response.Message))
 	}
 }

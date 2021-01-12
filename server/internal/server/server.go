@@ -1,3 +1,4 @@
+// Package server implements server logic: routes initialization and server configuration.
 package server
 
 import (
@@ -15,24 +16,24 @@ import (
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
-	logger     *logger.Logger
+	log        *logger.Logger
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.Config, logger *logger.Logger) *Server {
+func New(cfg *config.Config, log *logger.Logger) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
 		},
-		logger: logger,
+		log: log,
 	}
 }
 
 // Run configures routes and starts the server.
 func (server *Server) Run() error {
 	publisherSubscriber := service.NewPublisherSubscriber()
-	publisherHandler := handler.NewPublisher(publisherSubscriber, server.logger)
-	subscriberHandler := handler.NewSubscriber(publisherSubscriber, server.logger)
+	publisherHandler := handler.NewPublisher(publisherSubscriber, server.log)
+	subscriberHandler := handler.NewSubscriber(publisherSubscriber, server.log)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/publish", publisherHandler.Publish)

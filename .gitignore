@@ -1,2 +1,4 @@
 # Ignore directory with binary files.
 build/
+
+.*

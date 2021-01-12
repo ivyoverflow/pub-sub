@@ -1,3 +1,4 @@
+// Package handler contains described handlers.
 package handler
 
 import (
@@ -14,12 +15,12 @@ import (
 // Subscriber struct contains all handler for subscriber.
 type Subscriber struct {
 	pubSub *service.PublisherSubscriber
-	logger *logger.Logger
+	log    *logger.Logger
 }
 
 // NewSubscriber returns a new Subscriber object.
-func NewSubscriber(pubSub *service.PublisherSubscriber, logger *logger.Logger) *Subscriber {
-	return &Subscriber{pubSub, logger}
+func NewSubscriber(pubSub *service.PublisherSubscriber, log *logger.Logger) *Subscriber {
+	return &Subscriber{pubSub, log}
 }
 
 // Subscribe processes /subscribe route.
@@ -27,14 +28,14 @@ func (handler *Subscriber) Subscribe(ws *websocket.Conn) {
 	for {
 		request := &model.SubscribeRequest{}
 		if err := websocket.JSON.Receive(ws, request); err != nil {
-			handler.logger.Error(err.Error())
+			handler.log.Error(err.Error())
 			fmt.Fprintf(ws, `{"error": {"statusCode: %d", "message: %s"}}`, http.StatusBadRequest, err.Error())
 
 			return
 		}
 
 		channel := handler.pubSub.Subscribe(request.Topic)
-		handler.logger.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
+		handler.log.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
 		go func(channel chan interface{}) {
 			for message := range channel {
 				response := &model.Response{
@@ -42,7 +43,7 @@ func (handler *Subscriber) Subscribe(ws *websocket.Conn) {
 				}
 
 				if err := websocket.JSON.Send(ws, response); err != nil {
-					handler.logger.Error(err.Error())
+					handler.log.Error(err.Error())
 					fmt.Fprintf(ws, `{"error": {"statusCode: %d", "message: %s"}}`, http.StatusInternalServerError, err.Error())
 
 					return

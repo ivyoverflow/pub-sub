@@ -1,3 +1,4 @@
+// Package config contains the logic to initialize the application config.
 package config
 
 import (

@@ -1,10 +1,11 @@
+// Package config contains the logic to initialize the application config.
 package config
 
 import (
 	"os"
 )
 
-// Config contains addr and port fields that will be used to configure the server.
+// Config contains Addr and Port fields that will be used to configure the server.
 type Config struct {
 	Addr string
 	Port string
