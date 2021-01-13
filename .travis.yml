@@ -1,0 +1,15 @@
+language: go
+
+go:
+  - 1.15.x
+  - tip
+
+install:
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
+  - go mod download
+
+script:
+  - server/scripts/linter.sh
+  - listener/scripts/linter.sh
+  - server/scripts/test.sh
+  - listener/scripts/test.sh
