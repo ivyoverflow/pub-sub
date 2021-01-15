@@ -11,3 +11,6 @@ script:
   - chmod +x server/scripts/linter.sh
   - chmod +x listener/scripts/linter.sh
   - chmod +x server/scripts/test.sh
+  - chmod +x book/scripts/linter.sh
+  - chmod +x book/scripts/test.sh
+  - chmod +x book/scripts/build.sh

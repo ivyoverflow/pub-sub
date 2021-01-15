@@ -2,6 +2,9 @@
 build/
 
 .*
+book/scripts/build.sh
+server/scripts/build.sh
+listener/scripts/build.sh
 
 !.golangci.yml
 !.travis.yml
