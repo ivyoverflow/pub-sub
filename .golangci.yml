@@ -22,7 +22,7 @@ linters-settings:
   misspell:
     locale: US
   lll:
-    line-length: 140
+    line-length: 147
   funlen:
     lines: 200
     statements: 80

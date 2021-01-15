@@ -1,2 +1,2 @@
-cd server/ && \
+cd book/ && \
 go test -covermode=atomic ./...

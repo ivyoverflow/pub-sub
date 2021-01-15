@@ -31,9 +31,9 @@ func New(cfg *config.Config, log *logger.Logger) *Server {
 
 // Run configures routes and starts the server.
 func (server *Server) Run() error {
-	publisherSubscriber := service.NewPublisherSubscriber()
-	publisherHandler := handler.NewPublisher(publisherSubscriber, server.log)
-	subscriberHandler := handler.NewSubscriber(publisherSubscriber, server.log)
+	svc := service.NewPublisherSubscriber()
+	publisherHandler := handler.NewPublisher(svc, server.log)
+	subscriberHandler := handler.NewSubscriber(svc, server.log)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/publish", publisherHandler.Publish)

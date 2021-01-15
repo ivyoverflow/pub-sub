@@ -1,16 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"flag"
+	"log"
 
-	"golang.org/x/net/websocket"
-
+	"github.com/ivyoverflow/pub-sub/publisher/internal/client"
 	"github.com/ivyoverflow/pub-sub/publisher/internal/config"
 	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
-	"github.com/ivyoverflow/pub-sub/publisher/internal/model"
 )
 
+var (
+	topic string
+)
+
+func init() {
+	flag.StringVar(&topic, "topic", "", "sets the topic name for the subscription")
+}
+
 func main() {
+	flag.Parse()
+	if topic == "" {
+		log.Fatal("Set the name of the topic to subscribe. For example: \"news\"")
+	}
+
 	log, err := logger.New()
 	if err != nil {
 		log.Fatal(err.Error())
@@ -22,27 +34,8 @@ func main() {
 		return
 	}
 
-	ws, err := websocket.Dial(fmt.Sprintf("ws://%s:%s/subscribe", cfg.Addr, cfg.Port), "", fmt.Sprintf("http://%s:%s", cfg.Addr, cfg.Port))
-	if err != nil {
+	clt := client.New(log, cfg)
+	if err := clt.Run(topic); err != nil {
 		log.Fatal(err.Error())
-	}
-
-	defer ws.Close()
-
-	request := &model.Request{
-		Topic: "news",
-	}
-
-	if err := websocket.JSON.Send(ws, request); err != nil {
-		log.Error(err.Error())
-	}
-
-	for {
-		response := &model.Response{}
-		if err := websocket.JSON.Receive(ws, response); err != nil {
-			log.Error(err.Error())
-		}
-
-		log.Info(fmt.Sprintf("Client received <<< %s >> message", response.Message))
 	}
 }

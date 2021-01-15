@@ -7,11 +7,15 @@ listener:
 
 .PHONY: test
 test:
-	sh server/scripts/test.sh && sh listener/scripts/test.sh
+	sh server/scripts/test.sh && sh book/scripts/test.sh
 
 .PHONY: linter
 linter:
 	sh server/scripts/linter.sh && sh server/scripts/linter.sh
+
+.PHONY: book
+book:
+	sh book/scripts/build.sh
 
 clear:
 	rm -rf server/build/ && \

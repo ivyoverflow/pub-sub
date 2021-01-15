@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Config contains addr and port fields that will be used to configure the server.
+// Config contains Addr and Port fields that will be used to configure server.
 type Config struct {
 	Addr string
 	Port string
