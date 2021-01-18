@@ -9,50 +9,34 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
-	"github.com/ivyoverflow/pub-sub/book/internal/logger"
-	"github.com/ivyoverflow/pub-sub/book/internal/service"
-	"github.com/ivyoverflow/pub-sub/book/internal/store"
 )
 
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
-	log        *logger.Logger
-	cfg        *config.Config
+	handl      *handler.Book
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.Config, log *logger.Logger) *Server {
+func New(cfg *config.Config, handl *handler.Book) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr: fmt.Sprintf("%s:%s", cfg.Server.Addr, cfg.Server.Port),
 		},
-		log: log,
-		cfg: cfg,
+		handl: handl,
 	}
 }
 
 // Run configures routes and starts the server.
-func (server *Server) Run() error {
-	str, err := store.New(server.cfg)
-	if err != nil {
-		return err
-	}
-
-	svc, err := service.NewManager(str)
-	if err != nil {
-		return err
-	}
-
-	bookHandler := handler.NewBook(svc, server.log)
+func (srv *Server) Run() error {
 	router := mux.NewRouter()
-	bookRouter := router.PathPrefix("/books").Subrouter()
-	bookRouter.HandleFunc("/book/new", bookHandler.Add).Methods("POST")
-	bookRouter.HandleFunc("/book/{id}", bookHandler.Get).Methods("GET")
-	bookRouter.HandleFunc("/book/{id}", bookHandler.Update).Methods("PUT")
-	bookRouter.HandleFunc("/book/{id}", bookHandler.Delete).Methods("DELETE")
+	booksSubrouter := router.PathPrefix("/books").Subrouter()
+	booksSubrouter.HandleFunc("/book/new", srv.handl.Insert).Methods("POST")
+	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Get).Methods("GET")
+	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Update).Methods("PUT")
+	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Delete).Methods("DELETE")
 
-	server.httpServer.Handler = router
+	srv.httpServer.Handler = router
 
-	return server.httpServer.ListenAndServe()
+	return srv.httpServer.ListenAndServe()
 }

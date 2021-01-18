@@ -2,38 +2,40 @@
 package service
 
 import (
+	"context"
+
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	"github.com/ivyoverflow/pub-sub/book/internal/store"
+	"github.com/ivyoverflow/pub-sub/book/internal/repository"
 )
 
 // Book implements all service methods for book.
 type Book struct {
-	str *store.Store
+	repo repository.BookI
 }
 
 // NewBook returns a new configured Book object.
-func NewBook(str *store.Store) *Book {
-	return &Book{str}
+func NewBook(repo repository.BookI) *Book {
+	return &Book{repo}
 }
 
-// Add calls Add repository method.
-func (service *Book) Add(book *model.Book) (*model.Book, error) {
+// Insert calls Insert repository method.
+func (svc *Book) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
 	book.ID = GenerateUniqueID()
 
-	return service.str.Book.Add(book)
+	return svc.repo.Insert(ctx, book)
 }
 
 // Get calls Get repository method.
-func (service *Book) Get(bookID string) (*model.Book, error) {
-	return service.str.Book.Get(bookID)
+func (svc *Book) Get(ctx context.Context, bookID string) (*model.Book, error) {
+	return svc.repo.Get(ctx, bookID)
 }
 
 // Update calls Update repository method.
-func (service *Book) Update(bookID string, book *model.Book) (*model.Book, error) {
-	return service.str.Book.Update(bookID, book)
+func (svc *Book) Update(ctx context.Context, bookID string, book *model.Book) (*model.Book, error) {
+	return svc.repo.Update(ctx, bookID, book)
 }
 
 // Delete calls Delete repository method.
-func (service *Book) Delete(bookID string) (*model.Book, error) {
-	return service.str.Book.Delete(bookID)
+func (svc *Book) Delete(ctx context.Context, bookID string) (*model.Book, error) {
+	return svc.repo.Delete(ctx, bookID)
 }

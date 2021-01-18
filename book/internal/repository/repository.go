@@ -1,5 +1,5 @@
-// Package service contains all service logic.
-package service
+// Package repository contains repository interfaces and implementations.
+package repository
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 )
 
-// BookI describes all service methods for book.
+// BookI describes all repository methods for book.
 type BookI interface {
 	Insert(ctx context.Context, book *model.Book) (*model.Book, error)
 	Get(ctx context.Context, bookID string) (*model.Book, error)

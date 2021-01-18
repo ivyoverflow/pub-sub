@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -15,117 +16,118 @@ import (
 
 // Book contains all handlers for book.
 type Book struct {
-	svc *service.Manager
+	ctx context.Context
+	svc service.BookI
 	log *logger.Logger
 }
 
 // NewBook returns a new configured Book object.
-func NewBook(svc *service.Manager, log *logger.Logger) *Book {
-	return &Book{svc, log}
+func NewBook(ctx context.Context, svc service.BookI, log *logger.Logger) *Book {
+	return &Book{ctx, svc, log}
 }
 
-// Add calls Add service method and process POST requests.
-func (handler *Book) Add(rw http.ResponseWriter, r *http.Request) {
+// Insert calls Insert service method and process POST requests.
+func (handl *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	request := model.Book{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	createdBook, err := handler.svc.Book.Add(&request)
+	createdBook, err := handl.svc.Insert(handl.ctx, &request)
 	if err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
 	if err = json.NewEncoder(rw).Encode(createdBook); err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
-	handler.log.Debug(fmt.Sprintf("Book <<< %s >>> added", createdBook.Name))
+	handl.log.Debug(fmt.Sprintf("Book <<< %s >>> added", createdBook.Name))
 }
 
 // Get calls Get service method and process GET requests.
-func (handler *Book) Get(rw http.ResponseWriter, r *http.Request) {
+func (handl *Book) Get(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID := vars["id"]
-	book, err := handler.svc.Book.Get(bookID)
+	book, err := handl.svc.Get(handl.ctx, bookID)
 	if err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
 	if err = json.NewEncoder(rw).Encode(&book); err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
-	handler.log.Debug(fmt.Sprintf("Book <<< %s >>> sent", book.Name))
+	handl.log.Debug(fmt.Sprintf("Book <<< %s >>> sent", book.Name))
 }
 
 // Update calls Update service method and process UPDATE requests.
-func (handler *Book) Update(rw http.ResponseWriter, r *http.Request) {
+func (handl *Book) Update(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID := vars["id"]
 	request := model.Book{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	updatedBook, err := handler.svc.Book.Update(bookID, &request)
+	updatedBook, err := handl.svc.Update(handl.ctx, bookID, &request)
 	if err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
 	if err = json.NewEncoder(rw).Encode(&updatedBook); err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
-	handler.log.Debug(fmt.Sprintf("Book <<< %s >>> updated", updatedBook.Name))
+	handl.log.Debug(fmt.Sprintf("Book <<< %s >>> updated", updatedBook.Name))
 }
 
 // Delete calls Delete service method and process DELETE requests.
-func (handler *Book) Delete(rw http.ResponseWriter, r *http.Request) {
+func (handl *Book) Delete(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID := vars["id"]
-	deletedBook, err := handler.svc.Book.Delete(bookID)
+	deletedBook, err := handl.svc.Delete(handl.ctx, bookID)
 	if err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
 	if err = json.NewEncoder(rw).Encode(&deletedBook); err != nil {
-		handler.log.Error(err.Error())
+		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 		return
 	}
 
-	handler.log.Debug(fmt.Sprintf("Book <<< %s >>> deleted", deletedBook.Name))
+	handl.log.Debug(fmt.Sprintf("Book <<< %s >>> deleted", deletedBook.Name))
 }

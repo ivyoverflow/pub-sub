@@ -2,22 +2,24 @@
 package postgres
 
 import (
+	"context"
+
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 )
 
 // BookRepository implements all PostgreSQL repository methods for BookRepository.
 type BookRepository struct {
-	db *DB
+	pg *DB
 }
 
 // NewBookRepository returns a new configured BookRepository object.
-func NewBookRepository(db *DB) *BookRepository {
-	return &BookRepository{db}
+func NewBookRepository(pg *DB) *BookRepository {
+	return &BookRepository{pg}
 }
 
-// Add adds a new book to the books table.
-func (repository *BookRepository) Add(book *model.Book) (*model.Book, error) {
-	tx, err := repository.db.Begin()
+// Insert adds a new book to the books table.
+func (repo *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
+	tx, err := repo.pg.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -40,8 +42,8 @@ func (repository *BookRepository) Add(book *model.Book) (*model.Book, error) {
 }
 
 // Get receives a book from the books table by bookID.
-func (repository *BookRepository) Get(bookID string) (*model.Book, error) {
-	tx, err := repository.db.Begin()
+func (repo *BookRepository) Get(ctx context.Context, bookID string) (*model.Book, error) {
+	tx, err := repo.pg.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +65,8 @@ func (repository *BookRepository) Get(bookID string) (*model.Book, error) {
 }
 
 // Update updates a book from the books table by book ID.
-func (repository *BookRepository) Update(bookID string, book *model.Book) (*model.Book, error) {
-	tx, err := repository.db.Begin()
+func (repo *BookRepository) Update(ctx context.Context, bookID string, book *model.Book) (*model.Book, error) {
+	tx, err := repo.pg.Begin()
 	if err != nil {
 		return nil, err
 	}
@@ -87,8 +89,8 @@ func (repository *BookRepository) Update(bookID string, book *model.Book) (*mode
 }
 
 // Delete deletes a book from the books table by book ID.
-func (repository *BookRepository) Delete(bookID string) (*model.Book, error) {
-	tx, err := repository.db.Begin()
+func (repo *BookRepository) Delete(ctx context.Context, bookID string) (*model.Book, error) {
+	tx, err := repo.pg.Begin()
 	if err != nil {
 		return nil, err
 	}

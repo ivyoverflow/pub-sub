@@ -3,6 +3,7 @@ package handler_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/server/internal/handler"
 	"github.com/ivyoverflow/pub-sub/server/internal/logger"
+	"github.com/ivyoverflow/pub-sub/server/internal/model"
 	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 
@@ -18,7 +20,7 @@ func TestPublish_handler(t *testing.T) {
 	testCases := []struct {
 		name     string
 		body     string
-		expected string
+		expected model.ErrorResponse
 	}{
 		{
 			name: "OK",
@@ -27,7 +29,7 @@ func TestPublish_handler(t *testing.T) {
 				"topic": "news",
 				"message": "Ireland's 'brutally misogynistic culture' saw the death of 9,000 babies and children in mother and baby homes, report finds"
 			}`,
-			expected: ``,
+			expected: model.ErrorResponse{},
 		},
 		{
 			name: "OK",
@@ -36,7 +38,7 @@ func TestPublish_handler(t *testing.T) {
 				"topic": "games",
 				"message": "New Indiana Jones Game Coming From Bethesda"
 			}`,
-			expected: ``,
+			expected: model.ErrorResponse{},
 		},
 		{
 			name: "Wrong JSON field type",
@@ -45,21 +47,22 @@ func TestPublish_handler(t *testing.T) {
 				"topic": 1,
 				"message": "Hello World!"	
 			}`,
-			expected: `{"error": {"statusCode": 400, "message": "json: cannot unmarshal number into Go struct field PublishRequest.topic of type string"}}`,
+			expected: model.ErrorResponse{
+				Error: model.Error{
+					StatusCode: 400,
+					Message:    "json: cannot unmarshal number into Go struct field PublishRequest.topic of type string",
+				},
+			},
 		},
 		{
-			name:     "Empty request body",
-			body:     ``,
-			expected: `{"error": {"statusCode": 400, "message": "EOF"}}`,
-		},
-		{
-			name: "JSON syntax error",
-			body: `
-			{
-				"topic": "news"
-				"message": "House impeaches Trump for 'incitement of insurrection'"
-			}`,
-			expected: `{"error": {"statusCode": 400, "message": "invalid character '"' after object key:value pair"}}`,
+			name: "Empty request body",
+			body: ``,
+			expected: model.ErrorResponse{
+				Error: model.Error{
+					StatusCode: 400,
+					Message:    "EOF",
+				},
+			},
 		},
 	}
 
@@ -81,7 +84,9 @@ func TestPublish_handler(t *testing.T) {
 		}
 
 		mux.ServeHTTP(recorder, request)
+		errorResponse := model.ErrorResponse{}
+		json.NewDecoder(recorder.Body).Decode(&errorResponse)
 
-		assert.Equal(t, recorder.Body.String(), testCase.expected)
+		assert.Equal(t, errorResponse, testCase.expected)
 	}
 }

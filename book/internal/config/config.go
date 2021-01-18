@@ -2,6 +2,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"sync"
 )
@@ -69,4 +70,16 @@ func New() *Config {
 	})
 
 	return &config
+}
+
+// GetMongoConnectionURI ...
+func (cfg *MongoConfig) GetMongoConnectionURI() string {
+	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s",
+		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
+}
+
+// GetPostgresConnectionURI ...
+func (cfg *PostgresConfig) GetPostgresConnectionURI() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name, cfg.SSLMode)
 }

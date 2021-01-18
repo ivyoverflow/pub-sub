@@ -3,17 +3,16 @@ package postgres
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres" // Should be imprted for run migrations.
-	_ "github.com/golang-migrate/migrate/v4/source/file"       // Should be imprted for run migrations.
+	_ "github.com/golang-migrate/migrate/v4/database/postgres" // Should be imported for run migrations.
+	_ "github.com/golang-migrate/migrate/v4/source/file"       // Should be imported for run migrations.
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 )
 
-// RunMigration automatically starts PostgreSQL migrations.
-func RunMigration(cfg *config.Config) error {
+// runMigration automatically starts PostgreSQL migrations.
+func runMigration(cfg *config.Config) error {
 	if cfg.Postgres.MigartionsPath == "" {
 		return nil
 	}
@@ -23,11 +22,7 @@ func RunMigration(cfg *config.Config) error {
 		return errors.New("postgreSQL URL is incorrect")
 	}
 
-	mrt, err := migrate.New(
-		cfg.Postgres.MigartionsPath,
-		fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
-			cfg.Postgres.User, cfg.Postgres.Password, cfg.Postgres.Host,
-			cfg.Postgres.Port, cfg.Postgres.Name, cfg.Postgres.SSLMode))
+	mrt, err := migrate.New(cfg.Postgres.MigartionsPath, cfg.Postgres.GetPostgresConnectionURI())
 	if err != nil {
 		return err
 	}

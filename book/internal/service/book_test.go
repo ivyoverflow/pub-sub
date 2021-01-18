@@ -2,6 +2,7 @@
 package service_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -9,16 +10,15 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
+	mock "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
-	"github.com/ivyoverflow/pub-sub/book/internal/store"
-	mock "github.com/ivyoverflow/pub-sub/book/internal/store/mock"
 )
 
-func TestBook_Add(t *testing.T) {
+func TestBook_Insert(t *testing.T) {
 	testCases := []struct {
 		name        string
 		input       model.Book
-		expectation func(input *model.Book, bookRepository *mock.MockBookRepository)
+		expectation func(ctx context.Context, input *model.Book, bookRepository *mock.MockBookI)
 		err         error
 	}{
 		{
@@ -40,15 +40,15 @@ func TestBook_Add(t *testing.T) {
 				Price:   36.90,
 				InStock: true,
 			},
-			expectation: func(input *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Add(input).Return(input, nil)
+			expectation: func(ctx context.Context, input *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Insert(ctx, input).Return(input, nil)
 			},
 		},
 		{
 			name:  "Empty JSON body",
 			input: model.Book{},
-			expectation: func(input *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Add(input).Return(input, errors.New("EOF"))
+			expectation: func(ctx context.Context, input *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Insert(ctx, input).Return(input, errors.New("EOF"))
 			},
 		},
 		{
@@ -70,21 +70,22 @@ func TestBook_Add(t *testing.T) {
 				Price:   36.90,
 				InStock: true,
 			},
-			expectation: func(input *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Add(input).Return(input, errors.New("pq: duplicate key value violates unique constraint \"books_name_key\""))
+			expectation: func(ctx context.Context, input *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Insert(ctx, input).Return(input, errors.New("pq: duplicate key value violates unique constraint \"books_name_key\""))
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
+		ctx := context.Background()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		bookRepository := mock.NewMockBookRepository(ctrl)
-		svc := service.NewBook(&store.Store{Book: bookRepository})
-		testCase.expectation(&testCase.input, bookRepository)
+		bookRepository := mock.NewMockBookI(ctrl)
+		svc := service.NewBook(bookRepository)
+		testCase.expectation(ctx, &testCase.input, bookRepository)
 
-		createdBook, err := svc.Add(&testCase.input)
+		createdBook, err := svc.Insert(ctx, &testCase.input)
 		if err != nil {
 			if testCase.err != nil {
 				assert.Equal(t, testCase.err.Error(), err.Error())
@@ -100,7 +101,7 @@ func TestBook_Get(t *testing.T) {
 		name        string
 		bookID      string
 		expected    model.Book
-		expectation func(bookID string, expected *model.Book, bookRepository *mock.MockBookRepository)
+		expectation func(ctx context.Context, bookID string, expected *model.Book, bookRepository *mock.MockBookI)
 		err         error
 	}{
 		{
@@ -123,29 +124,30 @@ func TestBook_Get(t *testing.T) {
 				Price:   36.90,
 				InStock: true,
 			},
-			expectation: func(bookID string, expected *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Get(bookID).Return(expected, nil)
+			expectation: func(ctx context.Context, bookID string, expected *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Get(ctx, bookID).Return(expected, nil)
 			},
 		},
 		{
 			name:     "Book not found",
 			bookID:   service.GenerateUniqueID(),
 			expected: model.Book{},
-			expectation: func(bookID string, expected *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Get(bookID).Return(expected, errors.New("sql: no rows in result set"))
+			expectation: func(ctx context.Context, bookID string, expected *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Get(ctx, bookID).Return(expected, errors.New("sql: no rows in result set"))
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
+		ctx := context.Background()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		bookRepository := mock.NewMockBookRepository(ctrl)
-		svc := service.NewBook(&store.Store{Book: bookRepository})
-		testCase.expectation(testCase.bookID, &testCase.expected, bookRepository)
+		bookRepository := mock.NewMockBookI(ctrl)
+		svc := service.NewBook(bookRepository)
+		testCase.expectation(ctx, testCase.bookID, &testCase.expected, bookRepository)
 
-		receivedBook, err := svc.Get(testCase.bookID)
+		receivedBook, err := svc.Get(ctx, testCase.bookID)
 		if err != nil {
 			if testCase.err != nil {
 				assert.Equal(t, testCase.err.Error(), err.Error())
@@ -161,7 +163,7 @@ func TestBook_Update(t *testing.T) {
 		name        string
 		bookID      string
 		input       model.Book
-		expectation func(bookID string, input *model.Book, bookRepository *mock.MockBookRepository)
+		expectation func(ctx context.Context, bookID string, input *model.Book, bookRepository *mock.MockBookI)
 		err         error
 	}{
 		{
@@ -184,35 +186,36 @@ func TestBook_Update(t *testing.T) {
 				Price:   36.90,
 				InStock: false,
 			},
-			expectation: func(bookID string, input *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Update(bookID, input).Return(input, nil)
+			expectation: func(ctx context.Context, bookID string, input *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Update(ctx, bookID, input).Return(input, nil)
 			},
 		},
 		{
 			name:  "Empty JSON body",
 			input: model.Book{},
-			expectation: func(bookID string, input *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Update(bookID, input).Return(input, errors.New("EOF"))
+			expectation: func(ctx context.Context, bookID string, input *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Update(ctx, bookID, input).Return(input, errors.New("EOF"))
 			},
 		},
 		{
 			name:   "Wrong book ID",
 			bookID: "service.GenerateUniqueID()",
-			expectation: func(bookID string, input *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Update(bookID, input).Return(input, errors.New("sql: no rows in result set"))
+			expectation: func(ctx context.Context, bookID string, input *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Update(ctx, bookID, input).Return(input, errors.New("sql: no rows in result set"))
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
+		ctx := context.Background()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		bookRepository := mock.NewMockBookRepository(ctrl)
-		svc := service.NewBook(&store.Store{Book: bookRepository})
-		testCase.expectation(testCase.bookID, &testCase.input, bookRepository)
+		bookRepository := mock.NewMockBookI(ctrl)
+		svc := service.NewBook(bookRepository)
+		testCase.expectation(ctx, testCase.bookID, &testCase.input, bookRepository)
 
-		updatedBook, err := svc.Update(testCase.bookID, &testCase.input)
+		updatedBook, err := svc.Update(ctx, testCase.bookID, &testCase.input)
 		if err != nil {
 			if testCase.err != nil {
 				assert.Equal(t, testCase.err.Error(), err.Error())
@@ -228,34 +231,35 @@ func TestBook_Delete(t *testing.T) {
 		name        string
 		bookID      string
 		expected    model.Book
-		expectation func(bookID string, expected *model.Book, bookRepository *mock.MockBookRepository)
+		expectation func(ctx context.Context, bookID string, expected *model.Book, bookRepository *mock.MockBookI)
 		err         error
 	}{
 		{
 			name:   "OK",
 			bookID: service.GenerateUniqueID(),
-			expectation: func(bookID string, expected *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Delete(bookID).Return(expected, nil)
+			expectation: func(ctx context.Context, bookID string, expected *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Delete(ctx, bookID).Return(expected, nil)
 			},
 		},
 		{
 			name:   "Wrong book ID",
 			bookID: "service.GenerateUniqueID()",
-			expectation: func(bookID string, expected *model.Book, bookRepository *mock.MockBookRepository) {
-				bookRepository.EXPECT().Delete(bookID).Return(expected, errors.New("sql: no rows in result set"))
+			expectation: func(ctx context.Context, bookID string, expected *model.Book, bookRepository *mock.MockBookI) {
+				bookRepository.EXPECT().Delete(ctx, bookID).Return(expected, errors.New("sql: no rows in result set"))
 			},
 		},
 	}
 
 	for _, testCase := range testCases {
+		ctx := context.Background()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		bookRepository := mock.NewMockBookRepository(ctrl)
-		svc := service.NewBook(&store.Store{Book: bookRepository})
-		testCase.expectation(testCase.bookID, &testCase.expected, bookRepository)
+		bookRepository := mock.NewMockBookI(ctrl)
+		svc := service.NewBook(bookRepository)
+		testCase.expectation(ctx, testCase.bookID, &testCase.expected, bookRepository)
 
-		deletedBook, err := svc.Delete(testCase.bookID)
+		deletedBook, err := svc.Delete(ctx, testCase.bookID)
 		if err != nil {
 			if testCase.err != nil {
 				assert.Equal(t, testCase.err.Error(), err.Error())
