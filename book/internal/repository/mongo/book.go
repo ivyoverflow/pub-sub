@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 )
@@ -33,6 +34,10 @@ func (repo *BookRepository) Get(ctx context.Context, bookID string) (*model.Book
 	filter := bson.D{{Key: "id", Value: bookID}}
 	receivedBook := model.Book{}
 	if err := repo.db.Collection("books").FindOne(ctx, filter).Decode(&receivedBook); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
@@ -46,6 +51,10 @@ func (repo *BookRepository) Update(ctx context.Context, bookID string, book *mod
 		"description": book.Description, "rating": book.Rating, "price": book.Price, "inStock": book.InStock}}
 	updatedBook := model.Book{}
 	if err := repo.db.Collection("books").FindOneAndUpdate(ctx, filter, fieldsToUpdate).Decode(&updatedBook); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
@@ -57,6 +66,10 @@ func (repo *BookRepository) Delete(ctx context.Context, bookID string) (*model.B
 	filter := bson.D{{Key: "id", Value: bookID}}
 	deletedBook := model.Book{}
 	if err := repo.db.Collection("books").FindOneAndDelete(ctx, filter).Decode(&deletedBook); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
