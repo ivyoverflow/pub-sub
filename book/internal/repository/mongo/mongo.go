@@ -11,12 +11,12 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 )
 
-// DB ...
+// DB represents a MongoDB database.
 type DB struct {
 	*mongo.Database
 }
 
-// New ...
+// New connects to the MongoDB database and returns a new mongo.Database object or an error.
 func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 	clt, err := mongo.NewClient(options.Client().ApplyURI(cfg.Mongo.GetMongoConnectionURI()))
 	if err != nil {

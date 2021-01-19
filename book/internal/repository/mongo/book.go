@@ -10,17 +10,17 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 )
 
-// BookRepository ...
+// BookRepository implements all MongoDB repository methods for BookRepository.
 type BookRepository struct {
 	db *DB
 }
 
-// NewBookRepository ...
+// NewBookRepository returns a new configured BookRepository object.
 func NewBookRepository(db *DB) *BookRepository {
 	return &BookRepository{db}
 }
 
-// Insert ...
+// Insert adds a new book to the books collection.
 func (repo *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
 	if _, err := repo.db.Collection("books").InsertOne(ctx, book); err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (repo *BookRepository) Insert(ctx context.Context, book *model.Book) (*mode
 	return repo.Get(ctx, book.ID)
 }
 
-// Get ...
+// Get receives a book from the books collection by bookID.
 func (repo *BookRepository) Get(ctx context.Context, bookID string) (*model.Book, error) {
 	filter := bson.D{{Key: "id", Value: bookID}}
 	receivedBook := model.Book{}
@@ -44,7 +44,7 @@ func (repo *BookRepository) Get(ctx context.Context, bookID string) (*model.Book
 	return &receivedBook, nil
 }
 
-// Update ...
+// Update updates a book from the books collection by book ID.
 func (repo *BookRepository) Update(ctx context.Context, bookID string, book *model.Book) (*model.Book, error) {
 	filter := bson.D{{Key: "id", Value: bookID}}
 	fieldsToUpdate := bson.M{"$set": bson.M{"name": book.Name, "dateOfIssue": book.DateOfIssue, "author": book.Author,
@@ -61,7 +61,7 @@ func (repo *BookRepository) Update(ctx context.Context, bookID string, book *mod
 	return &updatedBook, nil
 }
 
-// Delete ...
+// Delete deletes a book from the books collection by book ID.
 func (repo *BookRepository) Delete(ctx context.Context, bookID string) (*model.Book, error) {
 	filter := bson.D{{Key: "id", Value: bookID}}
 	deletedBook := model.Book{}
