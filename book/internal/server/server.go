@@ -14,16 +14,18 @@ import (
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
+	mw         *handler.Middleware
 	handl      *handler.Book
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.Config, handl *handler.Book) *Server {
+func New(cfg *config.Config, mw *handler.Middleware, handl *handler.Book) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr: fmt.Sprintf("%s:%s", cfg.Server.Addr, cfg.Server.Port),
 		},
 		handl: handl,
+		mw:    mw,
 	}
 }
 
@@ -35,6 +37,7 @@ func (srv *Server) Run() error {
 	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Get).Methods("GET")
 	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Update).Methods("PUT")
 	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Delete).Methods("DELETE")
+	booksSubrouter.Use(srv.mw.AbortWithContext)
 
 	srv.httpServer.Handler = router
 

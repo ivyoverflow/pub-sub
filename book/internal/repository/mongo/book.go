@@ -3,6 +3,7 @@ package mongo
 
 import (
 	"context"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +26,8 @@ func (repo *BookRepository) Insert(ctx context.Context, book *model.Book) (*mode
 	if _, err := repo.db.Collection("books").InsertOne(ctx, book); err != nil {
 		return nil, err
 	}
+
+	time.Sleep(10 * time.Second)
 
 	return repo.Get(ctx, book.ID)
 }

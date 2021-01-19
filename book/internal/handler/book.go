@@ -9,7 +9,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/lib/validator"
 	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
@@ -38,15 +37,7 @@ func (handl *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vld := validator.New()
-	if err := vld.Validate(&request); err != nil {
-		handl.log.Error(err.Error())
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
-
-		return
-	}
-
-	createdBook, err := handl.svc.Insert(handl.ctx, &request)
+	createdBook, err := handl.svc.Insert(r.Context(), &request)
 	if err != nil {
 		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
@@ -69,7 +60,7 @@ func (handl *Book) Get(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID := vars["id"]
-	book, err := handl.svc.Get(handl.ctx, bookID)
+	book, err := handl.svc.Get(r.Context(), bookID)
 	if err != nil {
 		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
@@ -100,15 +91,7 @@ func (handl *Book) Update(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vld := validator.New()
-	if err := vld.Validate(&request); err != nil {
-		handl.log.Error(err.Error())
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
-
-		return
-	}
-
-	updatedBook, err := handl.svc.Update(handl.ctx, bookID, &request)
+	updatedBook, err := handl.svc.Update(r.Context(), bookID, &request)
 	if err != nil {
 		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
@@ -131,7 +114,7 @@ func (handl *Book) Delete(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID := vars["id"]
-	deletedBook, err := handl.svc.Delete(handl.ctx, bookID)
+	deletedBook, err := handl.svc.Delete(r.Context(), bookID)
 	if err != nil {
 		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
