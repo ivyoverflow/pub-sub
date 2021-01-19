@@ -8,7 +8,7 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 	"github.com/ivyoverflow/pub-sub/book/internal/logger"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository/postgres"
+	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
 )
@@ -21,12 +21,12 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	db, err := postgres.New(cfg)
+	db, err := mongo.New(ctx, cfg)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	bookRepo := postgres.NewBookRepository(db)
+	bookRepo := mongo.NewBookRepository(db)
 	bookSvc := service.NewBook(bookRepo)
 	bookHandl := handler.NewBook(ctx, bookSvc, log)
 	srv := server.New(cfg, bookHandl)

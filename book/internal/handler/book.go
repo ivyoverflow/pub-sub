@@ -9,6 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/validator"
 	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
@@ -31,6 +32,14 @@ func (handl *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	request := model.Book{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		handl.log.Error(err.Error())
+		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
+
+		return
+	}
+
+	vld := validator.New()
+	if err := vld.Validate(&request); err != nil {
 		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
@@ -85,6 +94,14 @@ func (handl *Book) Update(rw http.ResponseWriter, r *http.Request) {
 	bookID := vars["id"]
 	request := model.Book{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		handl.log.Error(err.Error())
+		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
+
+		return
+	}
+
+	vld := validator.New()
+	if err := vld.Validate(&request); err != nil {
 		handl.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
