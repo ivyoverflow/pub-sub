@@ -6,6 +6,9 @@ services:
     container_name: mongo
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=qwerty
 
   postgres:
     image: postgres:latest
@@ -13,4 +16,4 @@ services:
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: "qwerty"
+      - POSTGRES_PASSWORD=qwerty

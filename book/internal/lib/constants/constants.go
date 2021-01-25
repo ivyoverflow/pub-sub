@@ -5,8 +5,8 @@ const (
 	// MongoDB constants for tests.
 	MongoHost              = "localhost"
 	MongoPort              = "27017"
-	MongoName              = "bookdb"
-	MongoUser              = "mongo"
+	MongoName              = "admin"
+	MongoUser              = "admin"
 	MongoPassword          = "qwerty"
 	MongoMigrationsPath    = "file://migrations"
 	PostgresHost           = "localhost"
