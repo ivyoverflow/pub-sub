@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mongodb" // Should be imported for run migrations.
@@ -21,7 +20,7 @@ func runMigration(cfg *config.MongoConfig) error {
 		return errors.New("mongoDB URL is incorrect")
 	}
 
-	mrt, err := migrate.New(cfg.MigartionsPath, fmt.Sprintf("mongodb://@%s:%s/%s", cfg.Host, cfg.Port, cfg.Name))
+	mrt, err := migrate.New(cfg.MigartionsPath, cfg.GetMongoConnectionURI())
 	if err != nil {
 		return err
 	}

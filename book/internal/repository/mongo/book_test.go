@@ -23,11 +23,12 @@ var (
 
 func newMongoTestConfig() *config.MongoConfig {
 	return &config.MongoConfig{
-		Host:     constants.MongoHost,
-		Port:     constants.MongoPort,
-		Name:     constants.MongoName,
-		User:     constants.MongoUser,
-		Password: constants.MongoPassword,
+		Host:           constants.MongoHost,
+		Port:           constants.MongoPort,
+		Name:           constants.MongoName,
+		User:           constants.MongoUser,
+		Password:       constants.MongoPassword,
+		MigartionsPath: constants.MongoMigrationsPath,
 	}
 }
 
