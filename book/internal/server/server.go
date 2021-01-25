@@ -19,10 +19,10 @@ type Server struct {
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.Config, mw *handler.Middleware, handl *handler.Book) *Server {
+func New(cfg *config.ServerConfig, mw *handler.Middleware, handl *handler.Book) *Server {
 	return &Server{
 		httpServer: &http.Server{
-			Addr: fmt.Sprintf("%s:%s", cfg.Server.Addr, cfg.Server.Port),
+			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
 		},
 		handl: handl,
 		mw:    mw,

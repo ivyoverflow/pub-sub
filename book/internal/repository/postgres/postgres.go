@@ -13,8 +13,8 @@ type DB struct {
 }
 
 // New connects to the PostgreSQL database and returns a new sqlx.DB object or an error.
-func New(cfg *config.Config) (*DB, error) {
-	db, err := sqlx.Open("postgres", cfg.Postgres.GetPostgresConnectionURI())
+func New(cfg *config.PostgresConfig) (*DB, error) {
+	db, err := sqlx.Open("postgres", cfg.GetPostgresConnectionURI())
 	if err != nil {
 		return nil, err
 	}

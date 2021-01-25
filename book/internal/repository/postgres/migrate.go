@@ -12,17 +12,17 @@ import (
 )
 
 // runMigration automatically starts PostgreSQL migrations.
-func runMigration(cfg *config.Config) error {
-	if cfg.Postgres.MigartionsPath == "" {
+func runMigration(cfg *config.PostgresConfig) error {
+	if cfg.MigartionsPath == "" {
 		return nil
 	}
 
-	if cfg.Postgres.Host == "" || cfg.Postgres.Name == "" || cfg.Postgres.Port == "" ||
-		cfg.Postgres.User == "" || cfg.Postgres.Password == "" {
+	if cfg.Host == "" || cfg.Name == "" || cfg.Port == "" ||
+		cfg.User == "" || cfg.Password == "" {
 		return errors.New("postgreSQL URL is incorrect")
 	}
 
-	mrt, err := migrate.New(cfg.Postgres.MigartionsPath, cfg.Postgres.GetPostgresConnectionURI())
+	mrt, err := migrate.New(cfg.MigartionsPath, cfg.GetPostgresConnectionURI())
 	if err != nil {
 		return err
 	}

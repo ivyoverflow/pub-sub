@@ -1,0 +1,10 @@
+[
+    {
+        "dropIndexes": "books",
+        "index": "unique_id"
+    },
+    {
+        "dropIndexes": "books",
+        "index": "unique_name"
+    }
+]

@@ -9,15 +9,28 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/constants"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/postgres"
 )
 
 var (
-	cfg = config.New()
 	ctx = context.Background()
+	cfg = newPostgresTestConfig()
 )
+
+func newPostgresTestConfig() *config.PostgresConfig {
+	return &config.PostgresConfig{
+		Host:           constants.PostgresHost,
+		Port:           constants.PostgresPort,
+		Name:           constants.PostgresName,
+		User:           constants.PostgresUser,
+		Password:       constants.PostgresPassword,
+		MigartionsPath: constants.PostgresMigartionsPath,
+		SSLMode:        constants.PostgresSSLMode,
+	}
+}
 
 func clearDB(db *postgres.DB) error {
 	return db.QueryRow("DELETE FROM books").Err()

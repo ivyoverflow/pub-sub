@@ -1,31 +1,32 @@
 package mongo
 
 import (
-	"context"
+	"errors"
+	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/mongodb" // Should be imported for run migrations.
+	_ "github.com/golang-migrate/migrate/v4/source/file"      // Should be imported for run migrations.
+
+	"github.com/ivyoverflow/pub-sub/book/internal/config"
 )
 
-func runMigration(ctx context.Context, db *mongo.Database) error {
-	indexes := []mongo.IndexModel{
-		{
-			Keys: bson.D{
-				primitive.E{Key: "id", Value: 1},
-			},
-			Options: options.Index().SetUnique(true),
-		},
-		{
-			Keys: bson.D{
-				primitive.E{Key: "name", Value: 1},
-			},
-			Options: options.Index().SetUnique(true),
-		},
+func runMigration(cfg *config.MongoConfig) error {
+	if cfg.MigartionsPath == "" {
+		return nil
 	}
 
-	if _, err := db.Collection("books").Indexes().CreateMany(ctx, indexes); err != nil {
+	if cfg.Host == "" || cfg.Name == "" || cfg.Port == "" ||
+		cfg.User == "" || cfg.Password == "" {
+		return errors.New("mongoDB URL is incorrect")
+	}
+
+	mrt, err := migrate.New(cfg.MigartionsPath, fmt.Sprintf("mongodb://@%s:%s/%s", cfg.Host, cfg.Port, cfg.Name))
+	if err != nil {
+		return err
+	}
+
+	if err = mrt.Up(); err != nil && err != migrate.ErrNoChange {
 		return err
 	}
 

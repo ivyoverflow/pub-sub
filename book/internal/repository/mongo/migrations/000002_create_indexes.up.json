@@ -1,0 +1,21 @@
+[
+    {
+        "createIndexes": "books",
+        "indexes": [
+            {
+                "key": {
+                    "id": 1
+                },
+                "unique": true,
+                "name": "unique_id"
+            },
+            {
+                "key": {
+                    "name": 1
+                },
+                "unique": true,
+                "name": "unique_name"
+            }
+        ]
+    }
+]

@@ -1,0 +1,12 @@
+[
+    {
+        "createUser": "mongo",
+        "pwd": "qwerty",
+        "roles": [
+            {
+                "role": "readWrite",
+                "db": "bookdb"
+            }
+        ]
+    }
+]

@@ -8,18 +8,28 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/constants"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 )
 
 var (
-	cfg = config.New()
 	ctx = context.Background()
+	cfg = newMongoTestConfig()
 )
+
+func newMongoTestConfig() *config.MongoConfig {
+	return &config.MongoConfig{
+		Host:     constants.MongoHost,
+		Port:     constants.MongoPort,
+		Name:     constants.MongoName,
+		User:     constants.MongoUser,
+		Password: constants.MongoPassword,
+	}
+}
 
 func clearDB(db *mongo.DB) error {
 	if _, err := db.Collection("books").DeleteMany(ctx, bson.M{}); err != nil {
@@ -160,7 +170,7 @@ func TestMongoBookRepository_Get(t *testing.T) {
 				Author Katherine Cox-Buday takes you step-by-step through the process.
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,\
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
 				InStock: true,
 			},
 			expectedError: nil,
@@ -180,11 +190,6 @@ func TestMongoBookRepository_Get(t *testing.T) {
 
 	repo := mongo.NewBookRepository(db)
 	for _, testCase := range testCases {
-		testCase.input.Rating, err := primitive.ParseDecimal128("79.99")
-		if err != nil {
-			t.Errof("")
-		}
-
 		receivedBook, err := repo.Get(ctx, testCase.input)
 		if err != nil {
 			assert.Equal(t, testCase.expectedError, err)

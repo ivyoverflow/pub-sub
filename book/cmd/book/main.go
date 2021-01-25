@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	db, err := mongo.New(ctx, cfg)
+	db, err := mongo.New(ctx, &cfg.Mongo)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -31,7 +31,7 @@ func main() {
 	bookSvc := service.NewBook(bookRepo, gen)
 	bookMw := handler.NewMiddleware(ctx, log)
 	bookHandl := handler.NewBook(ctx, bookSvc, log)
-	srv := server.New(cfg, bookMw, bookHandl)
+	srv := server.New(&cfg.Server, bookMw, bookHandl)
 	if err = srv.Run(); err != nil {
 		log.Fatal(err.Error())
 	}

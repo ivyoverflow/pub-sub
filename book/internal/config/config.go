@@ -9,11 +9,12 @@ import (
 
 // MongoConfig contains fields that will be used to configure MongoDB connection.
 type MongoConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Name     string
-	Password string
+	Host           string
+	Port           string
+	User           string
+	Name           string
+	Password       string
+	MigartionsPath string
 }
 
 // PostgresConfig contains fields that will be used to configure PostgreSQL connection.
@@ -47,11 +48,12 @@ func New() *Config {
 	once.Do(func() {
 		config = Config{
 			Mongo: MongoConfig{
-				Host:     os.Getenv("MONGOHOST"),
-				Port:     os.Getenv("MONGOPORT"),
-				User:     os.Getenv("MONGOUSER"),
-				Name:     os.Getenv("MONGONAME"),
-				Password: os.Getenv("MONGOPASSWORD"),
+				Host:           os.Getenv("MONGOHOST"),
+				Port:           os.Getenv("MONGOPORT"),
+				User:           os.Getenv("MONGOUSER"),
+				Name:           os.Getenv("MONGONAME"),
+				Password:       os.Getenv("MONGOPASSWORD"),
+				MigartionsPath: os.Getenv("MONGOMIGRATIONSPATH"),
 			},
 			Postgres: PostgresConfig{
 				Host:           os.Getenv("PGHOST"),
