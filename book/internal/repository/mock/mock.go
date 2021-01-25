@@ -7,6 +7,7 @@ package mock_repository
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	model "github.com/ivyoverflow/pub-sub/book/internal/model"
 	reflect "reflect"
 )
@@ -50,7 +51,7 @@ func (mr *MockBookIMockRecorder) Insert(ctx, book interface{}) *gomock.Call {
 }
 
 // Get mocks base method
-func (m *MockBookI) Get(ctx context.Context, bookID string) (*model.Book, error) {
+func (m *MockBookI) Get(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx, bookID)
 	ret0, _ := ret[0].(*model.Book)
@@ -65,7 +66,7 @@ func (mr *MockBookIMockRecorder) Get(ctx, bookID interface{}) *gomock.Call {
 }
 
 // Update mocks base method
-func (m *MockBookI) Update(ctx context.Context, bookID string, book *model.Book) (*model.Book, error) {
+func (m *MockBookI) Update(ctx context.Context, bookID uuid.UUID, book *model.Book) (*model.Book, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", ctx, bookID, book)
 	ret0, _ := ret[0].(*model.Book)
@@ -80,7 +81,7 @@ func (mr *MockBookIMockRecorder) Update(ctx, bookID, book interface{}) *gomock.C
 }
 
 // Delete mocks base method
-func (m *MockBookI) Delete(ctx context.Context, bookID string) (*model.Book, error) {
+func (m *MockBookI) Delete(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", ctx, bookID)
 	ret0, _ := ret[0].(*model.Book)

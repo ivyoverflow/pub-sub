@@ -4,7 +4,9 @@ package service
 import (
 	"context"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/lib/validator"
+	"github.com/google/uuid"
+
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository"
 )
@@ -12,39 +14,40 @@ import (
 // Book implements all service methods for book.
 type Book struct {
 	repo repository.BookI
-	vld  *validator.Validator
+	gen  IDGeneratorI
 }
 
 // NewBook returns a new configured Book object.
-func NewBook(repo repository.BookI, vld *validator.Validator) *Book {
-	return &Book{repo, vld}
+func NewBook(repo repository.BookI, gen IDGeneratorI) *Book {
+	return &Book{repo, gen}
 }
 
 // Insert calls Insert repository method.
-func (svc *Book) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
-	book.ID = GenerateUniqueID()
-	if err := svc.vld.Validate(book); err != nil {
-		return nil, err
+func (s *Book) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
+	if err := Validate(book); err != nil {
+		return nil, types.ErrorBadRequest
 	}
 
-	return svc.repo.Insert(ctx, book)
+	book.ID = s.gen.Generate()
+
+	return s.repo.Insert(ctx, book)
 }
 
 // Get calls Get repository method.
-func (svc *Book) Get(ctx context.Context, bookID string) (*model.Book, error) {
-	return svc.repo.Get(ctx, bookID)
+func (s *Book) Get(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
+	return s.repo.Get(ctx, bookID)
 }
 
 // Update calls Update repository method.
-func (svc *Book) Update(ctx context.Context, bookID string, book *model.Book) (*model.Book, error) {
-	if err := svc.vld.Validate(book); err != nil {
-		return nil, err
+func (s *Book) Update(ctx context.Context, bookID uuid.UUID, book *model.Book) (*model.Book, error) {
+	if err := Validate(book); err != nil {
+		return nil, types.ErrorBadRequest
 	}
 
-	return svc.repo.Update(ctx, bookID, book)
+	return s.repo.Update(ctx, bookID, book)
 }
 
 // Delete calls Delete repository method.
-func (svc *Book) Delete(ctx context.Context, bookID string) (*model.Book, error) {
-	return svc.repo.Delete(ctx, bookID)
+func (s *Book) Delete(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
+	return s.repo.Delete(ctx, bookID)
 }

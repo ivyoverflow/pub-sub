@@ -7,7 +7,6 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
-	"github.com/ivyoverflow/pub-sub/book/internal/lib/validator"
 	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
@@ -28,8 +27,8 @@ func main() {
 	}
 
 	bookRepo := mongo.NewBookRepository(db)
-	vld := validator.New()
-	bookSvc := service.NewBook(bookRepo, vld)
+	gen := service.NewIDGenerator()
+	bookSvc := service.NewBook(bookRepo, gen)
 	bookMw := handler.NewMiddleware(ctx, log)
 	bookHandl := handler.NewBook(ctx, bookSvc, log)
 	srv := server.New(cfg, bookMw, bookHandl)

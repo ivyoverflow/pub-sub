@@ -24,18 +24,18 @@ func NewSubscriber(svc *service.PublisherSubscriber, log *logger.Logger) *Subscr
 }
 
 // Subscribe processes /subscribe route.
-func (handler *Subscriber) Subscribe(ws *websocket.Conn) {
+func (h *Subscriber) Subscribe(ws *websocket.Conn) {
 	for {
 		request := model.SubscribeRequest{}
 		if err := websocket.JSON.Receive(ws, &request); err != nil {
-			handler.log.Error(err.Error())
+			h.log.Error(err.Error())
 			fmt.Fprintf(ws, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
 			return
 		}
 
-		channel := handler.svc.Subscribe(request.Topic)
-		handler.log.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
+		channel := h.svc.Subscribe(request.Topic)
+		h.log.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
 		go func(channel chan interface{}) {
 			for message := range channel {
 				response := model.SuccessResponse{
@@ -43,7 +43,7 @@ func (handler *Subscriber) Subscribe(ws *websocket.Conn) {
 				}
 
 				if err := websocket.JSON.Send(ws, &response); err != nil {
-					handler.log.Error(err.Error())
+					h.log.Error(err.Error())
 					fmt.Fprintf(ws, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
 
 					return

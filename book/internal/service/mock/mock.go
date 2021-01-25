@@ -5,7 +5,9 @@
 package mock_service
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	model "github.com/ivyoverflow/pub-sub/book/internal/model"
 	reflect "reflect"
 )
@@ -34,61 +36,98 @@ func (m *MockBookI) EXPECT() *MockBookIMockRecorder {
 }
 
 // Insert mocks base method
-func (m *MockBookI) Insert(book *model.Book) (*model.Book, error) {
+func (m *MockBookI) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", book)
+	ret := m.ctrl.Call(m, "Insert", ctx, book)
 	ret0, _ := ret[0].(*model.Book)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Insert indicates an expected call of Insert
-func (mr *MockBookIMockRecorder) Insert(book interface{}) *gomock.Call {
+func (mr *MockBookIMockRecorder) Insert(ctx, book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockBookI)(nil).Insert), book)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockBookI)(nil).Insert), ctx, book)
 }
 
 // Get mocks base method
-func (m *MockBookI) Get(bookID string) (*model.Book, error) {
+func (m *MockBookI) Get(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", bookID)
+	ret := m.ctrl.Call(m, "Get", ctx, bookID)
 	ret0, _ := ret[0].(*model.Book)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get
-func (mr *MockBookIMockRecorder) Get(bookID interface{}) *gomock.Call {
+func (mr *MockBookIMockRecorder) Get(ctx, bookID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBookI)(nil).Get), bookID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockBookI)(nil).Get), ctx, bookID)
 }
 
 // Update mocks base method
-func (m *MockBookI) Update(bookID string, book *model.Book) (*model.Book, error) {
+func (m *MockBookI) Update(ctx context.Context, bookID uuid.UUID, book *model.Book) (*model.Book, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", bookID, book)
+	ret := m.ctrl.Call(m, "Update", ctx, bookID, book)
 	ret0, _ := ret[0].(*model.Book)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update
-func (mr *MockBookIMockRecorder) Update(bookID, book interface{}) *gomock.Call {
+func (mr *MockBookIMockRecorder) Update(ctx, bookID, book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBookI)(nil).Update), bookID, book)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockBookI)(nil).Update), ctx, bookID, book)
 }
 
 // Delete mocks base method
-func (m *MockBookI) Delete(bookID string) (*model.Book, error) {
+func (m *MockBookI) Delete(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", bookID)
+	ret := m.ctrl.Call(m, "Delete", ctx, bookID)
 	ret0, _ := ret[0].(*model.Book)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Delete indicates an expected call of Delete
-func (mr *MockBookIMockRecorder) Delete(bookID interface{}) *gomock.Call {
+func (mr *MockBookIMockRecorder) Delete(ctx, bookID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBookI)(nil).Delete), bookID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockBookI)(nil).Delete), ctx, bookID)
+}
+
+// MockIDGeneratorI is a mock of IDGeneratorI interface
+type MockIDGeneratorI struct {
+	ctrl     *gomock.Controller
+	recorder *MockIDGeneratorIMockRecorder
+}
+
+// MockIDGeneratorIMockRecorder is the mock recorder for MockIDGeneratorI
+type MockIDGeneratorIMockRecorder struct {
+	mock *MockIDGeneratorI
+}
+
+// NewMockIDGeneratorI creates a new mock instance
+func NewMockIDGeneratorI(ctrl *gomock.Controller) *MockIDGeneratorI {
+	mock := &MockIDGeneratorI{ctrl: ctrl}
+	mock.recorder = &MockIDGeneratorIMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockIDGeneratorI) EXPECT() *MockIDGeneratorIMockRecorder {
+	return m.recorder
+}
+
+// Generate mocks base method
+func (m *MockIDGeneratorI) Generate() uuid.UUID {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Generate")
+	ret0, _ := ret[0].(uuid.UUID)
+	return ret0
+}
+
+// Generate indicates an expected call of Generate
+func (mr *MockIDGeneratorIMockRecorder) Generate() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockIDGeneratorI)(nil).Generate))
 }

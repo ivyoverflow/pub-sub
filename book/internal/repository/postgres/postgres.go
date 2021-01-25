@@ -23,10 +23,8 @@ func New(cfg *config.Config) (*DB, error) {
 		return nil, err
 	}
 
-	if db != nil {
-		if err := runMigration(cfg); err != nil {
-			return nil, err
-		}
+	if err := runMigration(cfg); err != nil {
+		return nil, err
 	}
 
 	return &DB{db}, nil

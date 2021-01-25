@@ -33,5 +33,9 @@ func New(ctx context.Context, cfg *config.Config) (*DB, error) {
 
 	db := clt.Database("bookdb")
 
+	if err = runMigration(ctx, db); err != nil {
+		return nil, err
+	}
+
 	return &DB{db}, nil
 }

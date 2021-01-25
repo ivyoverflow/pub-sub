@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/ivyoverflow/pub-sub/publisher/internal/client"
@@ -21,8 +20,6 @@ func main() {
 	if topic == "" {
 		log.Fatal("Set the name of the topic to subscribe. For example: \"news\"")
 	}
-
-	fmt.Println(topic)
 
 	log, err := logger.New()
 	if err != nil {

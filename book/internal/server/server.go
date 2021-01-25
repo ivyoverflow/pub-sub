@@ -32,12 +32,12 @@ func New(cfg *config.Config, mw *handler.Middleware, handl *handler.Book) *Serve
 // Run configures routes and starts the server.
 func (srv *Server) Run() error {
 	router := mux.NewRouter()
-	booksSubrouter := router.PathPrefix("/books").Subrouter()
-	booksSubrouter.HandleFunc("/book/new", srv.handl.Insert).Methods("POST")
+	booksSubrouter := router.PathPrefix("/v1").Subrouter()
+	booksSubrouter.HandleFunc("/book/", srv.handl.Insert).Methods("POST")
 	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Get).Methods("GET")
 	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Update).Methods("PUT")
 	booksSubrouter.HandleFunc("/book/{id}", srv.handl.Delete).Methods("DELETE")
-	booksSubrouter.Use(srv.mw.AbortWithContext)
+	booksSubrouter.Use(srv.mw.AbortWithContext) // middleware component.
 
 	srv.httpServer.Handler = router
 

@@ -19,5 +19,5 @@ book:
 
 clear:
 	rm -rf server/build/ && \
-	rm -rf publisher/build/ && \
-	rm -rf listener/build/
+	rm -rf listener/build/ && \
+	rm -rf book/build/

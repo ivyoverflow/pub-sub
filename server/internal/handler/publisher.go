@@ -23,16 +23,16 @@ func NewPublisher(svc *service.PublisherSubscriber, log *logger.Logger) *Publish
 }
 
 // Publish processes /publish route.
-func (handler *Publisher) Publish(rw http.ResponseWriter, r *http.Request) {
+func (h *Publisher) Publish(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	request := model.PublishRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		handler.log.Error(err.Error())
+		h.log.Error(err.Error())
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
 		return
 	}
 
-	handler.svc.Publish(request.Topic, request.Message)
-	handler.log.Debug(fmt.Sprintf("The publisher sends a new message <<< %s >>> to the <<< %s >>> topic", request.Message, request.Topic))
+	h.svc.Publish(request.Topic, request.Message)
+	h.log.Debug(fmt.Sprintf("The publisher sends a new message <<< %s >>> to the <<< %s >>> topic", request.Message, request.Topic))
 }

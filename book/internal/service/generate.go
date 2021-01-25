@@ -1,17 +1,16 @@
-// Package service contains all service logic.
 package service
 
-import (
-	"crypto/rand"
-	"encoding/hex"
-)
+import "github.com/google/uuid"
 
-// GenerateUniqueID generates a random string that will be used for the book ID.
-func GenerateUniqueID() string {
-	bytes := make([]byte, 8)
-	if _, err := rand.Read(bytes); err != nil {
-		return ""
-	}
+// IDGenerator ...
+type IDGenerator struct{}
 
-	return hex.EncodeToString(bytes)
+// NewIDGenerator ...
+func NewIDGenerator() *IDGenerator {
+	return &IDGenerator{}
+}
+
+// Generate ...
+func (gen *IDGenerator) Generate() uuid.UUID {
+	return uuid.New()
 }
