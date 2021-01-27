@@ -1,43 +1,54 @@
+// Package handler contains described handlers.
 package handler
 
 import (
 	"fmt"
 	"net/http"
 
-	"github.com/ivyoverflow/internship/pubsub/server/internal/service"
-
 	"golang.org/x/net/websocket"
 
-	"github.com/ivyoverflow/internship/pubsub/server/internal/model"
+	"github.com/ivyoverflow/pub-sub/server/internal/logger"
+	"github.com/ivyoverflow/pub-sub/server/internal/model"
+	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 
-// SubscriberHandler struct contains all handler for subscriber.
-type SubscriberHandler struct {
-	pubSub *service.PublisherSubscriber
+// Subscriber struct contains all handler for subscriber.
+type Subscriber struct {
+	svc *service.PublisherSubscriber
+	log *logger.Logger
 }
 
-// NewSubscriberHandler returns a new SubscriberHandler object.
-func NewSubscriberHandler(pubSub *service.PublisherSubscriber) *SubscriberHandler {
-	return &SubscriberHandler{pubSub}
+// NewSubscriber returns a new Subscriber object.
+func NewSubscriber(svc *service.PublisherSubscriber, log *logger.Logger) *Subscriber {
+	return &Subscriber{svc, log}
 }
 
-// Subscribe func processes /user/subscribe route.
-func (handler *SubscriberHandler) Subscribe(ws *websocket.Conn) {
-	var request *model.SubscribeRequest
-	if err := websocket.JSON.Receive(ws, &request); err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		fmt.Fprintf(ws, fmt.Sprintf(`{"error": {"statusCode: %d", "message: %s"}}`, http.StatusBadRequest, err.Error()))
-		return
-	}
+// Subscribe processes /subscribe route.
+func (h *Subscriber) Subscribe(ws *websocket.Conn) {
+	for {
+		request := model.SubscribeRequest{}
+		if err := websocket.JSON.Receive(ws, &request); err != nil {
+			h.log.Error(err.Error())
+			fmt.Fprintf(ws, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, err.Error())
 
-	messageChannel := handler.pubSub.Subscribe(request.Topic)
-	response := &model.Response{
-		Message: <-messageChannel,
-	}
+			return
+		}
 
-	if err := websocket.JSON.Send(ws, response); err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		fmt.Fprintf(ws, fmt.Sprintf(`{"error": {"statusCode: %d", "message: %s"}}`, http.StatusInternalServerError, err.Error()))
-		return
+		channel := h.svc.Subscribe(request.Topic)
+		h.log.Debug(fmt.Sprintf("The user subscribed to the <<< %s >>> topic", request.Topic))
+		go func(channel chan interface{}) {
+			for message := range channel {
+				response := model.SuccessResponse{
+					Message: message,
+				}
+
+				if err := websocket.JSON.Send(ws, &response); err != nil {
+					h.log.Error(err.Error())
+					fmt.Fprintf(ws, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, err.Error())
+
+					return
+				}
+			}
+		}(channel)
 	}
 }

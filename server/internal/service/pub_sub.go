@@ -1,14 +1,12 @@
+// Package service cotains Publisher-Subscriber pattern implementation.
 package service
 
-import (
-	"sync"
-)
+import "sync"
 
 // PublisherSubscriber implements Publish-Subscriber pattern methods.
 type PublisherSubscriber struct {
-	mutex  sync.RWMutex
-	subs   map[string][]chan interface{}
-	closed bool
+	mutex sync.RWMutex
+	subs  map[string][]chan interface{}
 }
 
 // NewPublisherSubscriber returns a new PublishSubscriber object.
@@ -23,10 +21,6 @@ func NewPublisherSubscriber() *PublisherSubscriber {
 func (ps *PublisherSubscriber) Publish(topic string, message interface{}) {
 	ps.mutex.RLock()
 	defer ps.mutex.RUnlock()
-
-	if ps.closed {
-		return
-	}
 
 	for _, channel := range ps.subs[topic] {
 		go func(channel chan interface{}) {
@@ -44,19 +38,4 @@ func (ps *PublisherSubscriber) Subscribe(topic string) chan interface{} {
 	ps.subs[topic] = append(ps.subs[topic], channel)
 
 	return channel
-}
-
-// Close func closes all channels for all subscribers.
-func (ps *PublisherSubscriber) Close() {
-	ps.mutex.Lock()
-	defer ps.mutex.Unlock()
-
-	if !ps.closed {
-		ps.closed = true
-		for _, subs := range ps.subs {
-			for _, channel := range subs {
-				close(channel)
-			}
-		}
-	}
 }

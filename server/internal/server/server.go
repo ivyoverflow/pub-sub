@@ -1,21 +1,45 @@
+// Package server implements server logic: routes initialization and server configuration.
 package server
 
 import (
+	"fmt"
 	"net/http"
 
-	"github.com/ivyoverflow/internship/pubsub/server/internal/handler"
-	"github.com/ivyoverflow/internship/pubsub/server/internal/service"
 	"golang.org/x/net/websocket"
+
+	"github.com/ivyoverflow/pub-sub/server/internal/config"
+	"github.com/ivyoverflow/pub-sub/server/internal/handler"
+	"github.com/ivyoverflow/pub-sub/server/internal/logger"
+	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 
-// Run launches the server.
-func Run() error {
-	pubSub := service.NewPublisherSubscriber()
-	publisherHandler := handler.NewPublisherHandler(pubSub)
-	subscriberHandler := handler.NewSubscriberHandler(pubSub)
+// Server represents application server.
+type Server struct {
+	httpServer *http.Server
+	log        *logger.Logger
+}
 
-	http.Handle("/publisher/publish", websocket.Handler(publisherHandler.Publish))
-	http.Handle("/user/subscribe", websocket.Handler(subscriberHandler.Subscribe))
+// New returns a new configured Server object.
+func New(cfg *config.Config, log *logger.Logger) *Server {
+	return &Server{
+		httpServer: &http.Server{
+			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
+		},
+		log: log,
+	}
+}
 
-	return http.ListenAndServe(":8080", nil)
+// Run configures routes and starts the server.
+func (server *Server) Run() error {
+	svc := service.NewPublisherSubscriber()
+	publisherHandler := handler.NewPublisher(svc, server.log)
+	subscriberHandler := handler.NewSubscriber(svc, server.log)
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/publish", publisherHandler.Publish)
+	mux.Handle("/subscribe", websocket.Handler(subscriberHandler.Subscribe))
+
+	server.httpServer.Handler = mux
+
+	return server.httpServer.ListenAndServe()
 }
