@@ -21,8 +21,6 @@ linters-settings:
       - github.com/sirupsen/logrus
   misspell:
     locale: US
-  lll:
-    line-length: 147
   funlen:
     lines: 200
     statements: 80
@@ -63,7 +61,6 @@ linters:
     - govet             # (vet, vetshadow): Vet examines Go source code and reports suspicious constructs
     - ineffassign       # Detects when assignments to existing variables are not used
     - interfacer        # Linter that suggests narrower interface types
-    - lll               # Reports long lines [fast: true, auto-fix: false]
     - maligned          # Tool to detect Go structs that would take less memory if their fields were sorted
     - misspell          # Finds commonly misspelled English words in comments
     - nakedret          # Finds naked returns in functions greater than a specified function length

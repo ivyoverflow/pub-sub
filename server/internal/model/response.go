@@ -5,14 +5,3 @@ package model
 type SuccessResponse struct {
 	Message interface{} `json:"message"`
 }
-
-// ErrorResponse ...
-type ErrorResponse struct {
-	Error Error `json:"error"`
-}
-
-// Error ...
-type Error struct {
-	StatusCode int    `json:"statusCode"`
-	Message    string `json:"message"`
-}
