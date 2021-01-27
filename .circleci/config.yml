@@ -1,0 +1,24 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.15.7-buster
+      - image: circleci/mongo:4.4.3
+        environment:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: qwerty
+      - image: circleci/postgres:9.6.20
+        environment:
+          POSTGRES_PASSWORD: qwerty
+    steps:
+      - checkout
+      - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
+      - run: chmod +x book/scripts/lint.sh
+      - run: chmod +x server/scripts/lint.sh
+      - run: chmod +x server/scripts/test.sh
+      - run: chmod +x server/scripts/test.sh
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - build
