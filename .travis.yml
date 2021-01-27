@@ -10,32 +10,21 @@ notifications:
 services:
   - docker
 
-jobs:
-  include:
-  - stage Install GolangCI linter
-    install:
-      - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
-  - stage Run GolangCI linter
-    scripts:
-    - book/scripts/lint.sh
-    - server/scripts/lint.sh
-  - stage Download Docker images
-    install:
-    - docker pull postgres:9.6.20
-    - docker pull mongo:4.4.3
-  - stage Run docker-compose
-    script:
-    - docker-compose up -d
-    after_failure:
-      - git rebase -i HEAD^^
-  - stage Run book service tests
-    scripts:
-    - book/scripts/test.sh
-    after_failure:
-      - git rebase -i HEAD^^
-  - stage Run server service tests
-    scripts:
-    - server/scripts/test.sh
+
+install:
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
+scripts:
+- book/scripts/lint.sh
+- server/scripts/lint.sh
+install:
+- docker pull postgres:9.6.20
+- docker pull mongo:4.4.3
+script:
+- docker-compose up -d
+scripts:
+- book/scripts/test.sh
+scripts:
+- server/scripts/test.sh
 
 after_failure:
   - git rebase -i HEAD^^
