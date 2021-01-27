@@ -2,28 +2,24 @@ package main
 
 import (
 	"flag"
-	"log"
 
 	"github.com/ivyoverflow/pub-sub/publisher/internal/client"
 	"github.com/ivyoverflow/pub-sub/publisher/internal/config"
 	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
 )
 
-var topic string
-
-func init() {
-	flag.StringVar(&topic, "t", "", "sets the topic name for the subscription")
-}
-
 func main() {
+	var topic string
+	flag.StringVar(&topic, "t", "", "sets the topic name for the subscription")
 	flag.Parse()
-	if topic == "" {
-		log.Fatal("Set the name of the topic to subscribe. For example: \"news\"")
-	}
 
 	log, err := logger.New()
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+
+	if topic == "" {
+		log.Fatal("Set the name of the topic to subscribe. For example: \"news\"")
 	}
 
 	cfg := config.New()

@@ -1,3 +1,4 @@
+// Package client contains all method to run and configure the application client.
 package client
 
 import (
@@ -10,11 +11,13 @@ import (
 	"github.com/ivyoverflow/pub-sub/publisher/internal/model"
 )
 
+// Client represents application client.
 type Client struct {
 	log *logger.Logger
 	cfg *config.Config
 }
 
+// New returns a new configured Client object.
 func New(log *logger.Logger, cfg *config.Config) *Client {
 	return &Client{
 		log: log,
@@ -22,6 +25,7 @@ func New(log *logger.Logger, cfg *config.Config) *Client {
 	}
 }
 
+// Run runs application client.
 func (client *Client) Run(topic string) error {
 	ws, err := websocket.Dial(fmt.Sprintf("ws://%s:%s/subscribe", client.cfg.Addr, client.cfg.Port), "",
 		fmt.Sprintf("http://%s:%s", client.cfg.Addr, client.cfg.Port))

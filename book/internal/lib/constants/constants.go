@@ -1,8 +1,8 @@
+// Package constants contains all constants.
 package constants
 
-// Difines all constants for tests ...
+// Difines all constants.
 const (
-	// MongoDB constants for tests.
 	MongoHost              = "localhost"
 	MongoPort              = "27017"
 	MongoName              = "admin"

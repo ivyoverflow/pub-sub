@@ -17,7 +17,7 @@ type BookI interface {
 	Delete(ctx context.Context, bookID uuid.UUID) (*model.Book, error)
 }
 
-// IDGeneratorI ...
+// IDGeneratorI describes Generate() method.
 type IDGeneratorI interface {
 	Generate() uuid.UUID
 }

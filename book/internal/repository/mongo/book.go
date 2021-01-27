@@ -3,7 +3,6 @@ package mongo
 
 import (
 	"context"
-	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -26,19 +25,8 @@ func NewBookRepository(db *DB) *BookRepository {
 
 // Insert adds a new book to the books collection.
 func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
-	ratingBytes, err := book.Rating.MarshalBinary()
+	_, err := r.db.Collection("books").InsertOne(ctx, book)
 	if err != nil {
-		return nil, types.ErrorInternalServerError
-	}
-
-	priceBytes, err := book.Price.MarshalBinary()
-	if err != nil {
-		return nil, types.ErrorInternalServerError
-	}
-
-	fieldsToInsert := bson.M{"id": book.ID, "name": book.Name, "dateOfIssue": book.DateOfIssue, "author": book.Author,
-		"description": book.Description, "rating": ratingBytes, "price": priceBytes, "inStock": book.InStock}
-	if _, err := r.db.Collection("books").InsertOne(ctx, fieldsToInsert); err != nil {
 		switch {
 		case strings.Contains(err.Error(), "E11000"):
 			return nil, types.ErrorDuplicateValue
@@ -54,12 +42,12 @@ func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.B
 func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	filter := bson.D{{Key: "id", Value: bookID}}
 	receivedBook := model.Book{}
-	if err := r.db.Collection("books").FindOne(ctx, filter).Decode(&receivedBook); err != nil {
+	err := r.db.Collection("books").FindOne(ctx, filter).Decode(&receivedBook)
+	if err != nil {
 		switch {
 		case err == mongo.ErrNoDocuments:
 			return nil, types.ErrorNotFound
 		default:
-			log.Println(err.Error())
 			return nil, types.ErrorInternalServerError
 		}
 	}
@@ -69,11 +57,12 @@ func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book
 
 // Update updates a book from the books collection by book ID.
 func (r *BookRepository) Update(ctx context.Context, bookID uuid.UUID, book *model.Book) (*model.Book, error) {
-	filter := bson.D{{Key: "id", Value: bookID.String()}}
+	filter := bson.D{{Key: "id", Value: bookID}}
 	fieldsToUpdate := bson.M{"$set": bson.M{"name": book.Name, "dateOfIssue": book.DateOfIssue, "author": book.Author,
 		"description": book.Description, "rating": book.Rating, "price": book.Price, "inStock": book.InStock}}
 	updatedBook := model.Book{}
-	if err := r.db.Collection("books").FindOneAndUpdate(ctx, filter, fieldsToUpdate).Decode(&updatedBook); err != nil {
+	err := r.db.Collection("books").FindOneAndUpdate(ctx, filter, fieldsToUpdate).Decode(&updatedBook)
+	if err != nil {
 		switch {
 		case err == mongo.ErrNoDocuments:
 			return nil, types.ErrorNotFound
@@ -84,19 +73,20 @@ func (r *BookRepository) Update(ctx context.Context, bookID uuid.UUID, book *mod
 		}
 	}
 
-	return r.Get(ctx, bookID)
+	return r.Get(ctx, updatedBook.ID)
 }
 
 // Delete deletes a book from the books collection by book ID.
 func (r *BookRepository) Delete(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
-	filter := bson.D{{Key: "id", Value: bookID.String()}}
+	filter := bson.D{{Key: "id", Value: bookID}}
 	deletedBook := model.Book{}
-	if err := r.db.Collection("books").FindOneAndDelete(ctx, filter).Decode(&deletedBook); err != nil {
+	err := r.db.Collection("books").FindOneAndDelete(ctx, filter).Decode(&deletedBook)
+	if err != nil {
 		switch {
 		case err == mongo.ErrNoDocuments:
 			return nil, types.ErrorNotFound
 		default:
-			return nil, types.ErrorNotFound
+			return nil, types.ErrorInternalServerError
 		}
 	}
 

@@ -16,11 +16,6 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 )
 
-var (
-	ctx = context.Background()
-	cfg = newMongoTestConfig()
-)
-
 func newMongoTestConfig() *config.MongoConfig {
 	return &config.MongoConfig{
 		Host:           constants.MongoHost,
@@ -33,7 +28,7 @@ func newMongoTestConfig() *config.MongoConfig {
 }
 
 func clearDB(db *mongo.DB) error {
-	if _, err := db.Collection("books").DeleteMany(ctx, bson.M{}); err != nil {
+	if _, err := db.Collection("books").DeleteMany(context.Background(), bson.M{}); err != nil {
 		return err
 	}
 
@@ -61,8 +56,8 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expected: &model.Book{
@@ -77,8 +72,8 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expectedError: nil,
@@ -87,22 +82,22 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 			name: "OK",
 			input: model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
-				Name:        "Testing in Go",
-				DateOfIssue: "2020",
-				Author:      "Unknown",
+				Name:        "Introducing Go: Build Reliable, Scalable Programs",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
 				Description: `...`,
-				Rating:      decimal.NewFromFloat(71.00),
-				Price:       decimal.NewFromFloat(36.90),
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
 				InStock:     true,
 			},
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
-				Name:        "Testing in Go",
-				DateOfIssue: "2020",
-				Author:      "Unknown",
+				Name:        "Introducing Go: Build Reliable, Scalable Programs",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
 				Description: `...`,
-				Rating:      decimal.NewFromFloat(71.00),
-				Price:       decimal.NewFromFloat(36.90),
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
 				InStock:     true,
 			},
 			expectedError: nil,
@@ -121,8 +116,8 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expected:      nil,
@@ -130,6 +125,8 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newMongoTestConfig()
 	db, err := mongo.New(ctx, cfg)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
@@ -172,6 +169,8 @@ func TestMongoBookRepository_Get(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expectedError: nil,
@@ -184,6 +183,8 @@ func TestMongoBookRepository_Get(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newMongoTestConfig()
 	db, err := mongo.New(ctx, cfg)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
@@ -212,35 +213,23 @@ func TestMongoBookRepository_Update(t *testing.T) {
 			name:  "OK",
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			toUpdate: model.Book{
-				Name:        "Concurrency in Go: TTD",
-				DateOfIssue: "2017",
-				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Name:        "Introducing Go",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
 			},
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
-				Name:        "Concurrency in Go: TTD",
-				DateOfIssue: "2017",
-				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Name:        "Introducing Go",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
 			},
 			expectedError: nil,
 		},
@@ -248,19 +237,13 @@ func TestMongoBookRepository_Update(t *testing.T) {
 			name:  "Duplicate value",
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
 			toUpdate: model.Book{
-				Name:        "Concurrency in Go: TTD",
-				DateOfIssue: "2017",
-				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Name:        "Introducing Go",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
 			},
 			expected:      nil,
 			expectedError: types.ErrorDuplicateValue,
@@ -273,6 +256,8 @@ func TestMongoBookRepository_Update(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newMongoTestConfig()
 	db, err := mongo.New(ctx, cfg)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
@@ -301,19 +286,13 @@ func TestMongoBookRepository_Delete(t *testing.T) {
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
-				Name:        "Concurrency in Go: TTD",
-				DateOfIssue: "2017",
-				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Name:        "Introducing Go",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
 			},
 			expectedError: nil,
 		},
@@ -325,6 +304,8 @@ func TestMongoBookRepository_Delete(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newMongoTestConfig()
 	db, err := mongo.New(ctx, cfg)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)

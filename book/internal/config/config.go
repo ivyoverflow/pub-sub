@@ -74,13 +74,13 @@ func New() *Config {
 	return &config
 }
 
-// GetMongoConnectionURI ...
+// GetMongoConnectionURI returns the formatted Mongo URI.
 func (cfg *MongoConfig) GetMongoConnectionURI() string {
 	return fmt.Sprintf("mongodb://%s:%s@%s:%s/%s",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
 }
 
-// GetPostgresConnectionURI ...
+// GetPostgresConnectionURI returns the formatted Postgres URI.
 func (cfg *PostgresConfig) GetPostgresConnectionURI() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name, cfg.SSLMode)

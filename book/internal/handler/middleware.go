@@ -8,18 +8,18 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 )
 
-// Middleware ...
+// Middleware contains all middleware methods.
 type Middleware struct {
 	ctx context.Context
 	log *logger.Logger
 }
 
-// NewMiddleware ...
+// NewMiddleware returns a new configured Middleware object.
 func NewMiddleware(ctx context.Context, log *logger.Logger) *Middleware {
 	return &Middleware{ctx, log}
 }
 
-// AbortWithContext ...
+// AbortWithContext shutdowns the connection with timeout.
 func (mw *Middleware) AbortWithContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
@@ -35,6 +35,5 @@ func (mw *Middleware) AbortWithContext(next http.Handler) http.Handler {
 		default:
 			next.ServeHTTP(rw, r)
 		}
-
 	})
 }

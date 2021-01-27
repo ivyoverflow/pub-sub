@@ -22,10 +22,6 @@ import (
 	mock_service "github.com/ivyoverflow/pub-sub/book/internal/service/mock"
 )
 
-var (
-	ctx = context.Background()
-)
-
 func TestBookHandler_Insert(t *testing.T) {
 	testCases := []struct {
 		name                    string
@@ -37,9 +33,11 @@ func TestBookHandler_Insert(t *testing.T) {
 		expectedStatusCode      int
 	}{
 		{
-			name:           "OK",
-			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.","rating":71.00,"price":36.90,"inStock":true}`,
-			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.","rating":71.00,"price":36.90,"inStock":true}`, uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
+			name:        "OK",
+			inputString: `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
+`,
+				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
 			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {
 				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"))
 			},
@@ -48,9 +46,33 @@ func TestBookHandler_Insert(t *testing.T) {
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.`,
-				Rating:      decimal.NewFromFloat(71.0),
-				Price:       decimal.NewFromFloat(36.9),
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {
+				repo.EXPECT().Insert(gomock.Any(), expected).Return(expected, nil)
+			},
+			expectedStatusCode: 201,
+		},
+		{
+			name:        "OK",
+			inputString: `{"name":"Introduction to Go","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString: fmt.Sprintf(`{"id":"%s","name":"Introduction to Go","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
+`,
+				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004")),
+			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {
+				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"))
+			},
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
+				Name:        "Introduction to Go",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
 			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {
@@ -60,7 +82,7 @@ func TestBookHandler_Insert(t *testing.T) {
 		},
 		{
 			name:           "Duplicate value",
-			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.","rating":71.00,"price":36.90,"inStock":true}`,
+			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString: `{"error": {"statusCode": 409, "message": "duplicate value"}}`,
 			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {
 				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"))
@@ -70,9 +92,9 @@ func TestBookHandler_Insert(t *testing.T) {
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.`,
-				Rating:      decimal.NewFromFloat(71.0),
-				Price:       decimal.NewFromFloat(36.9),
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
 			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {
@@ -81,9 +103,17 @@ func TestBookHandler_Insert(t *testing.T) {
 			expectedStatusCode: 409,
 		},
 		{
+			name:                    "Invalid JSON value type",
+			inputString:             `{"name":"jfjwoaopfopwa","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": 111,"rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {},
+			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {},
+			expectedStatusCode:      400,
+		},
+		{
 			name:                    "Invalid JSON body",
 			inputString:             `{}`,
-			expectedString:          `{"error": {"statusCode": 409, "message": "bad request"}}`,
+			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
 			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {},
 			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {},
 			expectedStatusCode:      400,
@@ -97,6 +127,8 @@ func TestBookHandler_Insert(t *testing.T) {
 		repo := mock_repository.NewMockBookI(ctrl)
 		gen := mock_service.NewMockIDGeneratorI(ctrl)
 		testCase.mockBehaviorIDGenerator(gen)
+		ctx := context.Background()
+
 		testCase.mockBehaviorBook(ctx, testCase.expectedJSON, repo)
 
 		svc := service.NewBook(repo, gen)
@@ -114,83 +146,316 @@ func TestBookHandler_Insert(t *testing.T) {
 
 		router.ServeHTTP(rec, req)
 
-		assert.Equal(t, rec.Code, testCase.expectedStatusCode)
-		assert.Equal(t, rec.Body.String(), testCase.expectedString)
+		assert.Equal(t, testCase.expectedStatusCode, rec.Code)
+		assert.Equal(t, testCase.expectedString, rec.Body.String())
 	}
 }
 
-// func TestBookHandler_Get(t *testing.T) {
-// 	testCases := []struct {
-// 		name               string
-// 		input              uuid.UUID
-// 		expectedJSON       *model.Book
-// 		expectedString     string
-// 		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *mock_service.MockBookI)
-// 		expectedStatusCode int
-// 	}{
-// 		{
-// 			name:  "OK",
-// 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
-// 			expectedJSON: &model.Book{
-// 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
-// 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
-// 				DateOfIssue: "2017",
-// 				Author:      "Katherine Cox-Buday",
-// 				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.`,
-// 				Rating:      71.00,
-// 				Price:       36.90,
-// 				InStock:     true,
-// 			},
-// 			expectedString: `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming language makes working with concurrency tractable and even easy.","rating":71.00,"price":36.90,"inStock":true}`,
-// 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
-// 				repo.EXPECT().Get(ctx, bookID).Return(expected, nil)
-// 			},
-// 			expectedStatusCode: 200,
-// 		},
-// 		{
-// 			name:           "Book not found",
-// 			input:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
-// 			expectedJSON:   nil,
-// 			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
-// 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
-// 				repo.EXPECT().Get(ctx, bookID).Return(expected, types.ErrorNotFound)
-// 			},
-// 			expectedStatusCode: 404,
-// 		},
-// 	}
+func TestBookHandler_Get(t *testing.T) {
+	testCases := []struct {
+		name               string
+		inputStringID      string
+		inputUUID          uuid.UUID
+		expectedJSON       *model.Book
+		expectedString     string
+		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *mock_service.MockBookI)
+		expectedStatusCode int
+	}{
+		{
+			name:          "OK",
+			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
+`,
+				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
+				repo.EXPECT().Get(gomock.Any(), bookID).Return(expected, nil)
+			},
+			expectedStatusCode: 200,
+		},
+		{
+			name:               "Invalid UUID ID",
+			inputStringID:      "wakldlkawdlklakwdlk",
+			expectedJSON:       nil,
+			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			mockBehavior:       func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {},
+			expectedStatusCode: 500,
+		},
+		{
+			name:           "Book not found",
+			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120002",
+			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
+			expectedJSON:   nil,
+			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
+				repo.EXPECT().Get(gomock.Any(), bookID).Return(nil, types.ErrorNotFound)
+			},
+			expectedStatusCode: 404,
+		},
+	}
 
-// 	for _, testCase := range testCases {
-// 		ctrl := gomock.NewController(t)
-// 		defer ctrl.Finish()
+	for _, testCase := range testCases {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-// 		repo := mock_service.NewMockBookI(ctrl)
-// 		gen := mock_service.NewMockIDGeneratorI(ctrl)
-// 		testCase.mockBehavior(ctx, testCase.input, testCase.expectedJSON, repo)
+		repo := mock_service.NewMockBookI(ctrl)
+		gen := mock_service.NewMockIDGeneratorI(ctrl)
+		ctx := context.Background()
 
-// 		svc := service.NewBook(repo, gen)
-// 		log, err := logger.New()
-// 		if err != nil {
-// 			t.Errorf("Logger initialization throws an error: %v", err)
-// 		}
+		testCase.mockBehavior(ctx, testCase.inputUUID, testCase.expectedJSON, repo)
 
-// 		handl := handler.NewBook(ctx, svc, log)
-// 		router := mux.NewRouter()
-// 		router.HandleFunc("/v1/book/{id}", handl.Insert)
+		svc := service.NewBook(repo, gen)
+		log, err := logger.New()
+		if err != nil {
+			t.Errorf("Logger initialization throws an error: %v", err)
+		}
 
-// 		rec := httptest.NewRecorder()
-// 		req := httptest.NewRequest("GET", fmt.Sprintf("/v1/book/%s", testCase.input.String()), nil)
+		handl := handler.NewBook(ctx, svc, log)
+		router := mux.NewRouter()
+		router.HandleFunc("/v1/book/{id}", handl.Get)
 
-// 		router.ServeHTTP(rec, req)
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", fmt.Sprintf("/v1/book/%s", testCase.inputStringID), nil)
 
-// 		assert.Equal(t, rec.Code, testCase.expectedStatusCode)
-// 		assert.Equal(t, rec.Body.String(), testCase.expectedString)
-// 	}
-// }
+		router.ServeHTTP(rec, req)
 
-// func TestBookHandler_Update(t *testing.T) {
+		assert.Equal(t, testCase.expectedStatusCode, rec.Code)
+		assert.Equal(t, testCase.expectedString, rec.Body.String())
+	}
+}
 
-// }
+func TestBookHandler_Update(t *testing.T) {
+	testCases := []struct {
+		name               string
+		inputStringID      string
+		inputUUID          uuid.UUID
+		inputString        string
+		expectedString     string
+		toUpdate           model.Book
+		expectedJSON       *model.Book
+		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock_repository.MockBookI)
+		expectedStatusCode int
+	}{
+		{
+			name:          "OK",
+			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			inputString:   `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
+`,
+				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
+			toUpdate: model.Book{
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock_repository.MockBookI) {
+				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(expected, nil)
+			},
+			expectedStatusCode: 200,
+		},
+		{
+			name:           "Duplicate value",
+			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString: `{"error": {"statusCode": 409, "message": "duplicate value"}}`,
+			toUpdate: model.Book{
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedJSON: nil,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock_repository.MockBookI) {
+				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(nil, types.ErrorDuplicateValue)
+			},
+			expectedStatusCode: 409,
+		},
+		{
+			name:               "Invalid UUID ID",
+			inputStringID:      "wakldlkawdlklakwdlk",
+			expectedJSON:       nil,
+			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock_repository.MockBookI) {},
+			expectedStatusCode: 500,
+		},
+		{
+			name:               "Invalid JSON value type",
+			inputStringID:      "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputString:        `{"name":"jfjwoaopfopwa","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": 111,"rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString:     `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock_repository.MockBookI) {},
+			expectedStatusCode: 400,
+		},
+		{
+			name:           "Invalid JSON body",
+			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputString:    `{}`,
+			expectedString: `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock_repository.MockBookI) {
+			},
+			expectedStatusCode: 400,
+		},
+		{
+			name:          "Book not found",
+			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120006",
+			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120006"),
+			inputString:   `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedJSON:  nil,
+			toUpdate: model.Book{
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock_repository.MockBookI) {
+				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(expected, types.ErrorNotFound)
+			},
+			expectedStatusCode: 404,
+		},
+	}
 
-// func TestBookHandler_Delete(t *testing.T) {
+	for _, testCase := range testCases {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
 
-// }
+		repo := mock_repository.NewMockBookI(ctrl)
+		gen := mock_service.NewMockIDGeneratorI(ctrl)
+		ctx := context.Background()
+
+		testCase.mockBehavior(ctx, testCase.inputUUID, &testCase.toUpdate, testCase.expectedJSON, repo)
+
+		svc := service.NewBook(repo, gen)
+		log, err := logger.New()
+		if err != nil {
+			t.Errorf("Logger initialization throws an error: %v", err)
+		}
+
+		handl := handler.NewBook(ctx, svc, log)
+		router := mux.NewRouter()
+		router.HandleFunc("/v1/book/{id}", handl.Update)
+
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("PUT", fmt.Sprintf("/v1/book/%s", testCase.inputStringID), bytes.NewBufferString(testCase.inputString))
+
+		router.ServeHTTP(rec, req)
+
+		assert.Equal(t, testCase.expectedStatusCode, rec.Code)
+		assert.Equal(t, testCase.expectedString, rec.Body.String())
+	}
+}
+
+func TestBookHandler_Delete(t *testing.T) {
+	testCases := []struct {
+		name               string
+		inputStringID      string
+		inputUUID          uuid.UUID
+		expectedJSON       *model.Book
+		expectedString     string
+		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *mock_service.MockBookI)
+		expectedStatusCode int
+	}{
+		{
+			name:          "OK",
+			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
+`,
+				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
+				repo.EXPECT().Delete(gomock.Any(), bookID).Return(expected, nil)
+			},
+			expectedStatusCode: 200,
+		},
+		{
+			name:               "Invalid UUID ID",
+			inputStringID:      "wakldlkawdlklakwdlk",
+			expectedJSON:       nil,
+			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *mock_service.MockBookI) {},
+			expectedStatusCode: 500,
+		},
+		{
+			name:           "Book not found",
+			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120002",
+			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
+			expectedJSON:   nil,
+			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
+				repo.EXPECT().Delete(gomock.Any(), bookID).Return(expected, types.ErrorNotFound)
+			},
+			expectedStatusCode: 404,
+		},
+	}
+
+	for _, testCase := range testCases {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		repo := mock_service.NewMockBookI(ctrl)
+		gen := mock_service.NewMockIDGeneratorI(ctrl)
+		ctx := context.Background()
+
+		testCase.mockBehavior(ctx, testCase.inputUUID, testCase.expectedJSON, repo)
+
+		svc := service.NewBook(repo, gen)
+		log, err := logger.New()
+		if err != nil {
+			t.Errorf("Logger initialization throws an error: %v", err)
+		}
+
+		handl := handler.NewBook(ctx, svc, log)
+		router := mux.NewRouter()
+		router.HandleFunc("/v1/book/{id}", handl.Delete)
+
+		rec := httptest.NewRecorder()
+		req := httptest.NewRequest("DELETE", fmt.Sprintf("/v1/book/%s", testCase.inputStringID), nil)
+
+		router.ServeHTTP(rec, req)
+
+		assert.Equal(t, testCase.expectedStatusCode, rec.Code)
+		assert.Equal(t, testCase.expectedString, rec.Body.String())
+	}
+}

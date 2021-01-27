@@ -21,20 +21,24 @@ func TestSubscribe_handler(t *testing.T) {
 		expected string
 	}{
 		{
-			name: "OK",
-			body: `
-			{
-				"topic": "news"
-			}`,
+			name:     "OK",
+			body:     `{"topic":"news"}`,
 			expected: ``,
 		},
 		{
-			name: "OK",
-			body: `
-			{
-				"topic": "games"
-			}`,
+			name:     "OK",
+			body:     `{"topic":"games"}`,
 			expected: ``,
+		},
+		{
+			name:     "Wrong JSON field type",
+			body:     `{"topic":1}`,
+			expected: `{"error": {"statusCode": 400, "message": "json: cannot unmarshal number into Go struct field SubscribeRequest.topic of type string"}}`,
+		},
+		{
+			name:     "Empty request body",
+			body:     ``,
+			expected: `{"error": {"statusCode": 400, "message": "unexpected end of JSON input"}}`,
 		},
 	}
 
@@ -59,9 +63,5 @@ func TestSubscribe_handler(t *testing.T) {
 		}
 
 		defer ws.Close()
-
-		if err := websocket.JSON.Send(ws, testCase.body); err != nil {
-			t.Errorf("Websocket request throws an error: %v", err)
-		}
 	}
 }

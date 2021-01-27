@@ -27,7 +27,8 @@ func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.B
 	insertedBook := model.Book{}
 	query := `INSERT INTO books (id, name, date_of_issue, author, description, rating, price, in_stock)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`
-	row := r.pg.QueryRowContext(ctx, query, book.ID, book.Name, book.DateOfIssue, book.Author, book.Description, book.Rating, book.Price, book.InStock)
+	row := r.pg.QueryRowContext(ctx, query, book.ID, book.Name, book.DateOfIssue, book.Author,
+		book.Description, book.Rating, book.Price, book.InStock)
 	if err := row.Scan(&insertedBook.ID, &insertedBook.Name, &insertedBook.DateOfIssue, &insertedBook.Author,
 		&insertedBook.Description, &insertedBook.Rating, &insertedBook.Price, &insertedBook.InStock); err != nil {
 		switch {

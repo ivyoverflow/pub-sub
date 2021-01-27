@@ -15,10 +15,6 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
 )
 
-var (
-	ctx = context.Background()
-)
-
 func TestBookService_Insert(t *testing.T) {
 	testCases := []struct {
 		name          string
@@ -34,32 +30,20 @@ func TestBookService_Insert(t *testing.T) {
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			mockBehavior: func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
 				repo.EXPECT().Insert(ctx, book).Return(expected, nil)
@@ -73,22 +57,29 @@ func TestBookService_Insert(t *testing.T) {
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			expected: nil,
 			mockBehavior: func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
 				repo.EXPECT().Insert(ctx, book).Return(expected, types.ErrorDuplicateValue)
 			},
 			expectedError: types.ErrorDuplicateValue,
+		},
+		{
+			name: "Invalid body",
+			input: model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+			},
+			expected:      nil,
+			mockBehavior:  func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {},
+			expectedError: types.ErrorBadRequest,
 		},
 	}
 
@@ -99,6 +90,8 @@ func TestBookService_Insert(t *testing.T) {
 		repo := mock.NewMockBookI(ctrl)
 		gen := service.NewIDGenerator()
 		svc := service.NewBook(repo, gen)
+		ctx := context.Background()
+
 		testCase.mockBehavior(ctx, &testCase.input, testCase.expected, repo)
 
 		insertedBook, err := svc.Insert(ctx, &testCase.input)
@@ -126,16 +119,10 @@ func TestBookService_Get(t *testing.T) {
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookI) {
 				repo.EXPECT().Get(ctx, bookID).Return(expected, nil)
@@ -160,6 +147,8 @@ func TestBookService_Get(t *testing.T) {
 		repo := mock.NewMockBookI(ctrl)
 		gen := service.NewIDGenerator()
 		svc := service.NewBook(repo, gen)
+		ctx := context.Background()
+
 		testCase.mockBehavior(ctx, testCase.input, testCase.expected, repo)
 
 		insertedBook, err := svc.Get(ctx, testCase.input)
@@ -187,32 +176,20 @@ func TestBookService_Update(t *testing.T) {
 				Name:        "Concurrency in Go: TTD",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 				Name:        "Concurrency in Go: TTD",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
 				repo.EXPECT().Update(ctx, bookID, book).Return(expected, nil)
@@ -227,22 +204,29 @@ func TestBookService_Update(t *testing.T) {
 				Name:        "Concurrency in Go: TTD",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			expected: nil,
 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
 				repo.EXPECT().Update(ctx, bookID, book).Return(expected, types.ErrorNotFound)
 			},
 			expectedError: types.ErrorNotFound,
+		},
+		{
+			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			name:  "Invalid body",
+			toUpdate: model.Book{
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+			},
+			expected:      nil,
+			mockBehavior:  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookI) {},
+			expectedError: types.ErrorBadRequest,
 		},
 	}
 
@@ -253,6 +237,8 @@ func TestBookService_Update(t *testing.T) {
 		repo := mock.NewMockBookI(ctrl)
 		gen := service.NewIDGenerator()
 		svc := service.NewBook(repo, gen)
+		ctx := context.Background()
+
 		testCase.mockBehavior(ctx, testCase.input, &testCase.toUpdate, testCase.expected, repo)
 
 		insertedBook, err := svc.Update(ctx, testCase.input, &testCase.toUpdate)
@@ -280,16 +266,10 @@ func TestBookService_Delete(t *testing.T) {
 				Name:        "Concurrency in Go: TTD",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
-				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
-				InStock: true,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
 			},
 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookI) {
 				repo.EXPECT().Delete(ctx, bookID).Return(expected, nil)
@@ -314,6 +294,8 @@ func TestBookService_Delete(t *testing.T) {
 		repo := mock.NewMockBookI(ctrl)
 		gen := service.NewIDGenerator()
 		svc := service.NewBook(repo, gen)
+		ctx := context.Background()
+
 		testCase.mockBehavior(ctx, testCase.input, testCase.expected, repo)
 
 		insertedBook, err := svc.Delete(ctx, testCase.input)

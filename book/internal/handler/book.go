@@ -129,7 +129,7 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	request := model.Book{}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		h.log.Error(err.Error())
 		rw.WriteHeader(http.StatusBadRequest)
 		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
@@ -149,6 +149,11 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 		case err == types.ErrorDuplicateValue:
 			rw.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
+
+			return
+		case err == types.ErrorBadRequest:
+			rw.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
 
 			return
 		default:

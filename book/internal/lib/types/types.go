@@ -1,3 +1,4 @@
+// Package types contains all custom errors and types.
 package types
 
 import "errors"

@@ -18,24 +18,24 @@ type DB struct {
 
 // New connects to the MongoDB database and returns a new mongo.Database object or an error.
 func New(ctx context.Context, cfg *config.MongoConfig) (*DB, error) {
-	if err := runMigration(cfg); err != nil {
-		return nil, err
-	}
-
 	clt, err := mongo.NewClient(options.Client().ApplyURI(cfg.GetMongoConnectionURI()))
 	if err != nil {
 		return nil, err
 	}
 
-	if err = clt.Connect(ctx); err != nil {
+	if err := clt.Connect(ctx); err != nil {
 		return nil, err
 	}
 
-	if err = clt.Ping(ctx, readpref.Primary()); err != nil {
+	if err := clt.Ping(ctx, readpref.Primary()); err != nil {
 		return nil, err
 	}
 
 	db := clt.Database("bookdb")
+
+	if err := runMigration(ctx, db); err != nil {
+		return nil, err
+	}
 
 	return &DB{db}, nil
 }

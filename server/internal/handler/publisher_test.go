@@ -3,7 +3,6 @@ package handler_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/server/internal/handler"
 	"github.com/ivyoverflow/pub-sub/server/internal/logger"
-	"github.com/ivyoverflow/pub-sub/server/internal/model"
 	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 
@@ -20,49 +18,27 @@ func TestPublish_handler(t *testing.T) {
 	testCases := []struct {
 		name     string
 		body     string
-		expected model.ErrorResponse
+		expected string
 	}{
 		{
-			name: "OK",
-			body: `
-			{
-				"topic": "news",
-				"message": "Ireland's 'brutally misogynistic culture' saw the death of 9,000 babies and children in mother and baby homes, report finds"
-			}`,
-			expected: model.ErrorResponse{},
+			name:     "OK",
+			body:     `{"topic":"news","message":"Ireland's 'brutally misogynistic culture' saw the death of 9,000 babies and children in mother and baby homes, report finds"}`,
+			expected: "",
 		},
 		{
-			name: "OK",
-			body: `
-			{
-				"topic": "games",
-				"message": "New Indiana Jones Game Coming From Bethesda"
-			}`,
-			expected: model.ErrorResponse{},
+			name:     "OK",
+			body:     `{"topic":"games","message":"New Indiana Jones Game Coming From Bethesda"}`,
+			expected: "",
 		},
 		{
-			name: "Wrong JSON field type",
-			body: `
-			{
-				"topic": 1,
-				"message": "Hello World!"	
-			}`,
-			expected: model.ErrorResponse{
-				Error: model.Error{
-					StatusCode: 400,
-					Message:    "json: cannot unmarshal number into Go struct field PublishRequest.topic of type string",
-				},
-			},
+			name:     "Wrong JSON field type",
+			body:     `{"topic":1,"message":"Hello World!"}`,
+			expected: `{"error": {"statusCode": 400, "message": "json: cannot unmarshal number into Go struct field PublishRequest.topic of type string"}}`,
 		},
 		{
-			name: "Empty request body",
-			body: ``,
-			expected: model.ErrorResponse{
-				Error: model.Error{
-					StatusCode: 400,
-					Message:    "EOF",
-				},
-			},
+			name:     "Empty request body",
+			body:     ``,
+			expected: `{"error": {"statusCode": 400, "message": "EOF"}}`,
 		},
 	}
 
@@ -77,16 +53,14 @@ func TestPublish_handler(t *testing.T) {
 		mux := http.NewServeMux()
 		mux.HandleFunc("/publish", handl.Publish)
 
-		recorder := httptest.NewRecorder()
-		request, err := http.NewRequest("POST", "/publish", bytes.NewBufferString(testCase.body))
+		rec := httptest.NewRecorder()
+		req, err := http.NewRequest("POST", "/publish", bytes.NewBufferString(testCase.body))
 		if err != nil {
 			t.Errorf("HTTP request throws an error: %v", err)
 		}
 
-		mux.ServeHTTP(recorder, request)
-		errorResponse := model.ErrorResponse{}
-		json.NewDecoder(recorder.Body).Decode(&errorResponse)
+		mux.ServeHTTP(rec, req)
 
-		assert.Equal(t, errorResponse, testCase.expected)
+		assert.Equal(t, rec.Body.String(), testCase.expected)
 	}
 }

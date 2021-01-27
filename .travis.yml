@@ -4,13 +4,38 @@ go:
   - 1.15.x
   - tip
 
-install:
-  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
+notifications:
+  email: false
 
-script:
-  - chmod +x server/scripts/linter.sh
-  - chmod +x listener/scripts/linter.sh
-  - chmod +x server/scripts/test.sh
-  - chmod +x book/scripts/linter.sh
-  - chmod +x book/scripts/test.sh
-  - chmod +x book/scripts/build.sh
+services:
+  - docker
+
+jobs:
+  include:
+  - stage Install GolangCI linter
+    install:
+      - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
+  - stage Run GolangCI linter
+    scripts:
+    - book/scripts/lint.sh
+    - server/scripts/lint.sh
+  - stage Download Docker images
+    install:
+    - docker pull postgres:9.6.20
+    - docker pull mongo:4.4.3
+  - stage Run docker-compose
+    script:
+    - docker-compose up -d
+    after_failure:
+      - git rebase -i HEAD^^
+  - stage Run book service tests
+    scripts:
+    - book/scripts/test.sh
+    after_failure:
+      - git rebase -i HEAD^^
+  - stage Run server service tests
+    scripts:
+    - server/scripts/test.sh
+
+after_failure:
+  - git rebase -i HEAD^^

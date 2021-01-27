@@ -15,11 +15,6 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/postgres"
 )
 
-var (
-	ctx = context.Background()
-	cfg = newPostgresTestConfig()
-)
-
 func newPostgresTestConfig() *config.PostgresConfig {
 	return &config.PostgresConfig{
 		Host:           constants.PostgresHost,
@@ -57,8 +52,8 @@ func TestPostgresBookRepository_Insert(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expected: &model.Book{
@@ -73,9 +68,33 @@ func TestPostgresBookRepository_Insert(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
+			},
+			expectedError: nil,
+		},
+		{
+			name: "OK",
+			input: model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Introducing Go: Build Reliable, Scalable Programs",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
+			},
+			expected: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Introducing Go: Build Reliable, Scalable Programs",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
 			},
 			expectedError: nil,
 		},
@@ -93,15 +112,38 @@ func TestPostgresBookRepository_Insert(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expected:      nil,
 			expectedError: types.ErrorDuplicateValue,
 		},
+		{
+			name: "Overflowed the allowed number of characters ",
+			input: model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
+				Name:        "Introducing Go: Build Reliable, Scalable Programs",
+				DateOfIssue: "2016",
+				Author: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
+				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
+				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
+				Author Katherine Cox-Buday takes you step-by-step through the process.
+				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
+				and how you can compose primitives within this model to solve problems.
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
+			},
+			expected:      nil,
+			expectedError: types.ErrorInternalServerError,
+		},
 	}
 
+	ctx := context.Background()
+	cfg := newPostgresTestConfig()
 	db, err := postgres.New(cfg)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
@@ -144,20 +186,22 @@ func TestPostgresBookRepository_Get(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expectedError: nil,
 		},
 		{
 			name:          "Book not found",
-			input:         uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			input:         uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"),
 			expected:      nil,
 			expectedError: types.ErrorNotFound,
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newPostgresTestConfig()
 	db, err := postgres.New(cfg)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
@@ -196,8 +240,8 @@ func TestPostgresBookRepository_Update(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expected: &model.Book{
@@ -212,15 +256,51 @@ func TestPostgresBookRepository_Update(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expectedError: nil,
 		},
 		{
-			name:  "Book not found",
+			name:  "Duplicate value",
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			toUpdate: model.Book{
+				Name:        "Concurrency in Go: TTD",
+				DateOfIssue: "2016",
+				Author:      "Caleb Doxsey",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
+			},
+			expected:      nil,
+			expectedError: types.ErrorDuplicateValue,
+		},
+		{
+			name:  "Overflowed the allowed number of characters ",
+			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
+			toUpdate: model.Book{
+				Name:        "Introducing Go: Build Reliable, Scalable Programs",
+				DateOfIssue: "2016",
+				Author: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
+				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
+				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
+				Author Katherine Cox-Buday takes you step-by-step through the process.
+				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
+				and how you can compose primitives within this model to solve problems.
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
+				InStock:     true,
+			},
+			expected:      nil,
+			expectedError: types.ErrorInternalServerError,
+		},
+		{
+			name:  "Book not found",
+			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"),
 			toUpdate: model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
 				Name:        "Concurrency in Go: TTD",
@@ -233,8 +313,8 @@ func TestPostgresBookRepository_Update(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expected:      nil,
@@ -242,6 +322,8 @@ func TestPostgresBookRepository_Update(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newPostgresTestConfig()
 	db, err := postgres.New(cfg)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
@@ -280,20 +362,22 @@ func TestPostgresBookRepository_Delete(t *testing.T) {
 				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
 				and how you can compose primitives within this model to solve problems.
 				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Rating:  decimal.NewFromFloat(71.00),
-				Price:   decimal.NewFromFloat(36.90),
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock: true,
 			},
 			expectedError: nil,
 		},
 		{
 			name:          "Book not found",
-			input:         uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			input:         uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"),
 			expected:      nil,
 			expectedError: types.ErrorNotFound,
 		},
 	}
 
+	ctx := context.Background()
+	cfg := newPostgresTestConfig()
 	db, err := postgres.New(cfg)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
