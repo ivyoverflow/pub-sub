@@ -63,5 +63,9 @@ func TestSubscribe_handler(t *testing.T) {
 		}
 
 		defer ws.Close()
+
+		if err := websocket.JSON.Send(ws, testCase.body); err != nil {
+			t.Errorf("Websocket request throws an error: %v", err)
+		}
 	}
 }
