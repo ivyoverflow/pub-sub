@@ -10,14 +10,11 @@ jobs:
       - image: circleci/postgres:9.6.20
         environment:
           POSTGRES_PASSWORD: qwerty
+    working_directory: /go/src/github.com/ivyoverflow/pub-sub
     steps:
       - checkout
-      # GolangCI linter installation.
-      - run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
-      - run: chmod +x book/scripts/lint.sh
-      - run: chmod +x server/scripts/lint.sh
-      - run: chmod +x server/scripts/test.sh
-      - run: chmod +x server/scripts/test.sh
+      - run: cd book/ && go test -covermode=atomic ./...
+      - run: cd server/ && go test -covermode=atomic ./...
 workflows:
   version: 2
   build-workflow:
