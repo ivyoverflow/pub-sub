@@ -3,6 +3,7 @@ module github.com/ivyoverflow/pub-sub/server
 go 1.15
 
 require (
+	github.com/golang/mock v1.4.4
 	github.com/ivyoverflow/pub-sub/platform v0.0.0-00010101000000-000000000000
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.5.1

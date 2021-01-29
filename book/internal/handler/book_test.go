@@ -3,6 +3,7 @@ package handler_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http/httptest"
 	"testing"
@@ -118,6 +119,28 @@ func TestBookHandler_Insert(t *testing.T) {
 			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {},
 			expectedStatusCode:      400,
 		},
+		{
+			name:           "Service error",
+			inputString:    `{"name":"Hello World","dateOfIssue":"2017","author":"John Bob","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"),
+				Name:        "Hello World",
+				DateOfIssue: "2017",
+				Author:      "John Bob",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {
+				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"))
+			},
+			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {
+				repo.EXPECT().Insert(gomock.Any(), expected).Return(nil, errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -201,6 +224,26 @@ func TestBookHandler_Get(t *testing.T) {
 				repo.EXPECT().Get(gomock.Any(), bookID).Return(nil, types.ErrorNotFound)
 			},
 			expectedStatusCode: 404,
+		},
+		{
+			name:          "OK",
+			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
+				repo.EXPECT().Get(gomock.Any(), bookID).Return(nil, errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
 		},
 	}
 
@@ -345,6 +388,26 @@ func TestBookHandler_Update(t *testing.T) {
 			},
 			expectedStatusCode: 404,
 		},
+		{
+			name:           "Service error",
+			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
+			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			toUpdate: model.Book{
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock_repository.MockBookI) {
+				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(nil, errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -427,6 +490,26 @@ func TestBookHandler_Delete(t *testing.T) {
 				repo.EXPECT().Delete(gomock.Any(), bookID).Return(expected, types.ErrorNotFound)
 			},
 			expectedStatusCode: 404,
+		},
+		{
+			name:          "Service error",
+			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120003",
+			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+			expectedJSON: &model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: Tools and Techniques for Developers",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `...`,
+				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock:     true,
+			},
+			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock_service.MockBookI) {
+				repo.EXPECT().Delete(gomock.Any(), bookID).Return(nil, errors.New("something went wrong"))
+			},
+			expectedStatusCode: 500,
 		},
 	}
 

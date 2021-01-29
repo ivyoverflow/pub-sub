@@ -29,9 +29,8 @@ func main() {
 	bookRepo := mongo.NewBookRepository(db)
 	gen := service.NewIDGenerator()
 	bookSvc := service.NewBook(bookRepo, gen)
-	bookMw := handler.NewMiddleware(ctx, log)
 	bookHandl := handler.NewBook(ctx, bookSvc, log)
-	srv := server.New(&cfg.Server, bookMw, bookHandl)
+	srv := server.New(&cfg.Server, bookHandl)
 	if err = srv.Run(); err != nil {
 		log.Fatal(err.Error())
 	}
