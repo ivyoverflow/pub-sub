@@ -7,7 +7,6 @@
 1. 🍃 MongoDB.
 2. 🐘 PostgreSQL.
 3. 🐹 Golang.
----
 ## 📌 How to run tests?
 ### 🐳 With Docker:
 🍨 Run docker-compose with the following command:
@@ -23,7 +22,6 @@ make test
 ```bash
 circleci local execute --job build
 ```
----
 ## 📌 How to run services?
 
 >💡 WARNING: Before trying to run anything, you must have the following environment variables:
@@ -44,6 +42,5 @@ export PGMIGRATIONSPATH="/internal/repository/postgres/migrations" # Do not chan
 export PGSSLMODE="disable" # Do not change!
 ```
 > 💡 Further steps will be described in the future.
----
 ## 🚀 Contributors
 [👨🏻‍🎓 ivyoverflow](https://github.com/ivyoverflow) &&  [👨🏻‍🚀 kiryalovik](https://github.com/kiryalovik)
