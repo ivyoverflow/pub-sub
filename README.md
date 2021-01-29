@@ -1,3 +1,7 @@
+![CircleCI Status](https://img.shields.io/circleci/build/github/ivyoverflow/pub-sub/main?style=flat-square)
+![GitHub Issues](https://img.shields.io/github/issues/ivyoverflow/pub-sub?style=flat-square)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/ivyoverflow/pub-sub?style=flat-square)
+![GitHub Last Commit](https://img.shields.io/github/last-commit/ivyoverflow/pub-sub?style=flat-square)
 # 🦹🏻‍♀️ pub-sub
 ## 🧪 What we are using?
 1. 🍃 MongoDB.
