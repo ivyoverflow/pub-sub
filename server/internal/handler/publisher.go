@@ -13,12 +13,12 @@ import (
 
 // Publisher struct contains all handlers for publisher.
 type Publisher struct {
-	svc service.PublisherSubscriberI
+	svc *service.PublisherSubscriber
 	log *logger.Logger
 }
 
 // NewPublisher returns a new configured Publisher object.
-func NewPublisher(svc service.PublisherSubscriberI, log *logger.Logger) *Publisher {
+func NewPublisher(svc *service.PublisherSubscriber, log *logger.Logger) *Publisher {
 	return &Publisher{svc, log}
 }
 

@@ -14,12 +14,12 @@ import (
 
 // Subscriber struct contains all handler for subscriber.
 type Subscriber struct {
-	svc service.PublisherSubscriberI
+	svc *service.PublisherSubscriber
 	log *logger.Logger
 }
 
 // NewSubscriber returns a new Subscriber object.
-func NewSubscriber(svc service.PublisherSubscriberI, log *logger.Logger) *Subscriber {
+func NewSubscriber(svc *service.PublisherSubscriber, log *logger.Logger) *Subscriber {
 	return &Subscriber{svc, log}
 }
 
