@@ -3,6 +3,7 @@ build/
 
 .*
 *.out
+cover.html
 
 !.golangci.yml
 !.circleci
