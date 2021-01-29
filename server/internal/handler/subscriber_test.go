@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/net/websocket"
 
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 	"github.com/ivyoverflow/pub-sub/server/internal/handler"
-	"github.com/ivyoverflow/pub-sub/server/internal/logger"
 	"github.com/ivyoverflow/pub-sub/server/internal/service"
 )
 

@@ -12,9 +12,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
-	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 // Book contains all handlers for book.

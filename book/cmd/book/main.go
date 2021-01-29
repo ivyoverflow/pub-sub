@@ -7,10 +7,10 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
-	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 func main() {

@@ -15,11 +15,11 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
-	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	mock_repository "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
 	mock_service "github.com/ivyoverflow/pub-sub/book/internal/service/mock"
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 func TestBookHandler_Insert(t *testing.T) {

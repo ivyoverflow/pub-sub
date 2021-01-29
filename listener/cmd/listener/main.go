@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 
-	"github.com/ivyoverflow/pub-sub/publisher/internal/client"
-	"github.com/ivyoverflow/pub-sub/publisher/internal/config"
-	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
+	"github.com/ivyoverflow/pub-sub/listenter/internal/client"
+	"github.com/ivyoverflow/pub-sub/listenter/internal/config"
+	"github.com/ivyoverflow/pub-sub/listenter/internal/logger"
 )
 
 func main() {

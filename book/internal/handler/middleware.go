@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/logger"
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 // Middleware contains all middleware methods.
