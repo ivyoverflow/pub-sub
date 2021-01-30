@@ -7,10 +7,10 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
-	"github.com/ivyoverflow/pub-sub/book/internal/logger"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 func main() {
@@ -29,9 +29,8 @@ func main() {
 	bookRepo := mongo.NewBookRepository(db)
 	gen := service.NewIDGenerator()
 	bookSvc := service.NewBook(bookRepo, gen)
-	bookMw := handler.NewMiddleware(ctx, log)
 	bookHandl := handler.NewBook(ctx, bookSvc, log)
-	srv := server.New(&cfg.Server, bookMw, bookHandl)
+	srv := server.New(&cfg.Server, bookHandl)
 	if err = srv.Run(); err != nil {
 		log.Fatal(err.Error())
 	}

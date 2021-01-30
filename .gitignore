@@ -2,9 +2,8 @@
 build/
 
 .*
-book/scripts/build.sh
-server/scripts/build.sh
-listener/scripts/build.sh
+*.out
+cover.html
 
 !.golangci.yml
 !.circleci

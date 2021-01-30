@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 )
 
 // DB represents a PostgreSQL database.
@@ -16,14 +17,14 @@ type DB struct {
 func New(cfg *config.PostgresConfig) (*DB, error) {
 	db, err := sqlx.Open("postgres", cfg.GetPostgresConnectionURI())
 	if err != nil {
-		return nil, err
+		return nil, types.ErrorPostgresConnectionRefused
 	}
 
 	if err := db.Ping(); err != nil {
-		return nil, err
+		return nil, types.ErrorPostgresConnectionRefused
 	}
 
-	if err := runMigration(cfg); err != nil {
+	if err := RunMigration(cfg); err != nil {
 		return nil, err
 	}
 

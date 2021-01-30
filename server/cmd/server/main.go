@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/ivyoverflow/pub-sub/platform/logger"
 	"github.com/ivyoverflow/pub-sub/server/internal/config"
-	"github.com/ivyoverflow/pub-sub/server/internal/logger"
 	"github.com/ivyoverflow/pub-sub/server/internal/server"
 )
 

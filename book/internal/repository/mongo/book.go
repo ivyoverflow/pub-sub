@@ -23,9 +23,14 @@ func NewBookRepository(db *DB) *BookRepository {
 	return &BookRepository{db}
 }
 
+// Collection returns a MongoDB collection.
+func (r *BookRepository) Collection() *mongo.Collection {
+	return r.db.Collection("books")
+}
+
 // Insert adds a new book to the books collection.
 func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
-	_, err := r.db.Collection("books").InsertOne(ctx, book)
+	_, err := r.Collection().InsertOne(ctx, book)
 	if err != nil {
 		switch {
 		case strings.Contains(err.Error(), "E11000"):
@@ -42,7 +47,7 @@ func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.B
 func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	filter := bson.D{{Key: "id", Value: bookID}}
 	receivedBook := model.Book{}
-	err := r.db.Collection("books").FindOne(ctx, filter).Decode(&receivedBook)
+	err := r.Collection().FindOne(ctx, filter).Decode(&receivedBook)
 	if err != nil {
 		switch {
 		case err == mongo.ErrNoDocuments:
@@ -61,7 +66,7 @@ func (r *BookRepository) Update(ctx context.Context, bookID uuid.UUID, book *mod
 	fieldsToUpdate := bson.M{"$set": bson.M{"name": book.Name, "dateOfIssue": book.DateOfIssue, "author": book.Author,
 		"description": book.Description, "rating": book.Rating, "price": book.Price, "inStock": book.InStock}}
 	updatedBook := model.Book{}
-	err := r.db.Collection("books").FindOneAndUpdate(ctx, filter, fieldsToUpdate).Decode(&updatedBook)
+	err := r.Collection().FindOneAndUpdate(ctx, filter, fieldsToUpdate).Decode(&updatedBook)
 	if err != nil {
 		switch {
 		case err == mongo.ErrNoDocuments:
@@ -80,7 +85,7 @@ func (r *BookRepository) Update(ctx context.Context, bookID uuid.UUID, book *mod
 func (r *BookRepository) Delete(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 	filter := bson.D{{Key: "id", Value: bookID}}
 	deletedBook := model.Book{}
-	err := r.db.Collection("books").FindOneAndDelete(ctx, filter).Decode(&deletedBook)
+	err := r.Collection().FindOneAndDelete(ctx, filter).Decode(&deletedBook)
 	if err != nil {
 		switch {
 		case err == mongo.ErrNoDocuments:

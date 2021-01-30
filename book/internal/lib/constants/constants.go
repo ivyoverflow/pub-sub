@@ -8,7 +8,6 @@ const (
 	MongoName              = "admin"
 	MongoUser              = "admin"
 	MongoPassword          = "qwerty"
-	MongoMigrationsPath    = "file://migrations"
 	PostgresHost           = "localhost"
 	PostgresPort           = "5432"
 	PostgresUser           = "postgres"

@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/config"
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 )
 
 // DB represents a MongoDB database.
@@ -20,20 +21,20 @@ type DB struct {
 func New(ctx context.Context, cfg *config.MongoConfig) (*DB, error) {
 	clt, err := mongo.NewClient(options.Client().ApplyURI(cfg.GetMongoConnectionURI()))
 	if err != nil {
-		return nil, err
+		return nil, types.ErrorMongoConnectionRefused
 	}
 
 	if err := clt.Connect(ctx); err != nil {
-		return nil, err
+		return nil, types.ErrorMongoConnectionRefused
 	}
 
 	if err := clt.Ping(ctx, readpref.Primary()); err != nil {
-		return nil, err
+		return nil, types.ErrorMongoConnectionRefused
 	}
 
-	db := clt.Database("bookdb")
+	db := clt.Database(cfg.Name)
 
-	if err := runMigration(ctx, db); err != nil {
+	if err := RunMigration(ctx, db); err != nil {
 		return nil, err
 	}
 

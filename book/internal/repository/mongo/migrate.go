@@ -6,9 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 )
 
-func runMigration(ctx context.Context, db *mongo.Database) error {
+// RunMigration creates unique indexes.
+func RunMigration(ctx context.Context, db *mongo.Database) error {
 	indexes := []mongo.IndexModel{
 		{
 			Keys:    bson.D{{Key: "id", Value: 1}},
@@ -21,7 +24,7 @@ func runMigration(ctx context.Context, db *mongo.Database) error {
 	}
 
 	if _, err := db.Collection("books").Indexes().CreateMany(ctx, indexes); err != nil {
-		return err
+		return types.ErrorMigrate
 	}
 
 	return nil

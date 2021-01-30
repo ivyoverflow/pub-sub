@@ -6,9 +6,9 @@ import (
 
 	"golang.org/x/net/websocket"
 
-	"github.com/ivyoverflow/pub-sub/publisher/internal/config"
-	"github.com/ivyoverflow/pub-sub/publisher/internal/logger"
-	"github.com/ivyoverflow/pub-sub/publisher/internal/model"
+	"github.com/ivyoverflow/pub-sub/listenter/internal/config"
+	"github.com/ivyoverflow/pub-sub/listenter/internal/logger"
+	"github.com/ivyoverflow/pub-sub/listenter/internal/model"
 )
 
 // Client represents application client.

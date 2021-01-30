@@ -23,5 +23,8 @@ var (
 	// username, email and password.
 	// If our user send a JSON body with username that has already been
 	// inserted into the database table, we will get an ErrorDuplicateValue error.
-	ErrorDuplicateValue = errors.New("duplicate value")
+	ErrorDuplicateValue            = errors.New("duplicate value")
+	ErrorMongoConnectionRefused    = errors.New("mongodb connection refused")
+	ErrorPostgresConnectionRefused = errors.New("postgres connection refused")
+	ErrorMigrate                   = errors.New("migrations cannot start")
 )
