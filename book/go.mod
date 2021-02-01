@@ -13,6 +13,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/ivyoverflow/pub-sub/platform v0.0.0-00010101000000-000000000000
 	github.com/jmoiron/sqlx v1.2.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/klauspost/compress v1.11.7 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.8.0

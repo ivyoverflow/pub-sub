@@ -5,27 +5,14 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	_ "github.com/lib/pq"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
-	"github.com/ivyoverflow/pub-sub/book/internal/lib/constants"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/postgres"
 )
-
-func newPostgresTestConfig() *config.PostgresConfig {
-	return &config.PostgresConfig{
-		Host:           constants.PostgresHost,
-		Port:           constants.PostgresPort,
-		Name:           constants.PostgresName,
-		User:           constants.PostgresUser,
-		Password:       constants.PostgresPassword,
-		MigartionsPath: constants.PostgresMigartionsPath,
-		SSLMode:        constants.PostgresSSLMode,
-	}
-}
 
 func clearDB(db *postgres.DB) error {
 	return db.QueryRow("DELETE FROM books").Err()
@@ -143,8 +130,7 @@ func TestPostgresBookRepository_Insert(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newPostgresTestConfig()
-	db, err := postgres.New(cfg)
+	db, err := postgres.New(ctx)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
 	}
@@ -201,8 +187,7 @@ func TestPostgresBookRepository_Get(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newPostgresTestConfig()
-	db, err := postgres.New(cfg)
+	db, err := postgres.New(ctx)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
 	}
@@ -323,8 +308,7 @@ func TestPostgresBookRepository_Update(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newPostgresTestConfig()
-	db, err := postgres.New(cfg)
+	db, err := postgres.New(ctx)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
 	}
@@ -377,8 +361,7 @@ func TestPostgresBookRepository_Delete(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newPostgresTestConfig()
-	db, err := postgres.New(cfg)
+	db, err := postgres.New(ctx)
 	if err != nil {
 		t.Errorf("Postgres connection throws an error: %v", err)
 	}

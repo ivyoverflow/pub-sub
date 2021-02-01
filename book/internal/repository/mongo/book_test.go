@@ -9,22 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
-	"github.com/ivyoverflow/pub-sub/book/internal/lib/constants"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 )
-
-func newMongoTestConfig() *config.MongoConfig {
-	return &config.MongoConfig{
-		Host:     constants.MongoHost,
-		Port:     constants.MongoPort,
-		Name:     constants.MongoName,
-		User:     constants.MongoUser,
-		Password: constants.MongoPassword,
-	}
-}
 
 func clearDB(db *mongo.DB) error {
 	if _, err := db.Collection("books").DeleteMany(context.Background(), bson.M{}); err != nil {
@@ -125,8 +113,7 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
+	db, err := mongo.New(ctx)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
 	}
@@ -183,8 +170,7 @@ func TestMongoBookRepository_Get(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
+	db, err := mongo.New(ctx)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
 	}
@@ -256,8 +242,7 @@ func TestMongoBookRepository_Update(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
+	db, err := mongo.New(ctx)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
 	}
@@ -304,8 +289,7 @@ func TestMongoBookRepository_Delete(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
+	db, err := mongo.New(ctx)
 	if err != nil {
 		t.Errorf("Mongo connection throws an error: %v", err)
 	}

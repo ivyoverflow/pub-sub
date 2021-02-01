@@ -38,8 +38,10 @@ export PGPORT="<YOUR PORT>"
 export PGUSER="<YOUR USERNAME>"
 export PGNAME="<YOUR DATABASE NAME>"
 export PGPASSWORD="<YOUR PASSWORD>"
-export PGMIGRATIONSPATH="/internal/repository/postgres/migrations" # Do not change!
-export PGSSLMODE="disable" # Do not change!
+export PGSSLMODE="<YOUR SSL MODE>"
+# server environment variables.
+export ADDR="<YOUR HOST>"
+export PORT="<YOUR PORT>"
 ```
 > 💡 Further steps will be described in the future.
 ## 🚀 Contributors

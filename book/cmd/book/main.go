@@ -5,7 +5,6 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
@@ -15,13 +14,12 @@ import (
 
 func main() {
 	ctx := context.Background()
-	cfg := config.New()
 	log, err := logger.New()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	db, err := mongo.New(ctx, &cfg.Mongo)
+	db, err := mongo.New(ctx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -30,7 +28,7 @@ func main() {
 	gen := service.NewIDGenerator()
 	bookSvc := service.NewBook(bookRepo, gen)
 	bookHandl := handler.NewBook(ctx, bookSvc, log)
-	srv := server.New(&cfg.Server, bookHandl)
+	srv := server.New(bookHandl)
 	if err = srv.Run(); err != nil {
 		log.Fatal(err.Error())
 	}
