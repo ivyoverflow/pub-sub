@@ -26,6 +26,7 @@ require (
 	golang.org/x/text v0.3.5 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gotest.tools v2.2.0+incompatible
 )
 
 replace github.com/ivyoverflow/pub-sub/platform => ../platform
