@@ -49,8 +49,8 @@ func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book
 	row := r.pg.QueryRowContext(ctx, query, bookID)
 	if err := row.Scan(&book.ID, &book.Name, &book.DateOfIssue, &book.Author, &book.Description,
 		&book.Rating, &book.Price, &book.InStock); err != nil {
-		switch {
-		case err == sql.ErrNoRows:
+		switch err {
+		case sql.ErrNoRows:
 			return nil, types.ErrorNotFound
 		default:
 			return nil, types.ErrorInternalServerError
@@ -88,8 +88,8 @@ func (r *BookRepository) Delete(ctx context.Context, bookID uuid.UUID) (*model.B
 	row := r.pg.QueryRowContext(ctx, query, bookID)
 	if err := row.Scan(&deletedBook.ID, &deletedBook.Name, &deletedBook.DateOfIssue, &deletedBook.Author, &deletedBook.Description,
 		&deletedBook.Rating, &deletedBook.Price, &deletedBook.InStock); err != nil {
-		switch {
-		case err == sql.ErrNoRows:
+		switch err {
+		case sql.ErrNoRows:
 			return nil, types.ErrorNotFound
 		default:
 			return nil, types.ErrorInternalServerError

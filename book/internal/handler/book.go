@@ -44,13 +44,13 @@ func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 	insertedBook, err := h.svc.Insert(r.Context(), &request)
 	if err != nil {
 		h.log.Error(err.Error())
-		switch {
-		case err == types.ErrorDuplicateValue:
+		switch err {
+		case types.ErrorDuplicateValue:
 			rw.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
 
 			return
-		case err == types.ErrorBadRequest:
+		case types.ErrorBadRequest:
 			rw.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
 
@@ -91,8 +91,8 @@ func (h *Book) Get(rw http.ResponseWriter, r *http.Request) {
 	book, err := h.svc.Get(r.Context(), bookID)
 	if err != nil {
 		h.log.Error(err.Error())
-		switch {
-		case err == types.ErrorNotFound:
+		switch err {
+		case types.ErrorNotFound:
 			rw.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusNotFound, types.ErrorNotFound.Error())
 
@@ -140,18 +140,18 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 	updatedBook, err := h.svc.Update(r.Context(), bookID, &request)
 	if err != nil {
 		h.log.Error(err.Error())
-		switch {
-		case err == types.ErrorNotFound:
+		switch err {
+		case types.ErrorNotFound:
 			rw.WriteHeader(http.StatusNotFound)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusNotFound, types.ErrorNotFound.Error())
 
 			return
-		case err == types.ErrorDuplicateValue:
+		case types.ErrorDuplicateValue:
 			rw.WriteHeader(http.StatusConflict)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
 
 			return
-		case err == types.ErrorBadRequest:
+		case types.ErrorBadRequest:
 			rw.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
 
