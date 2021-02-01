@@ -29,14 +29,19 @@ func NewBook(ctx context.Context, svc service.BookI, log *logger.Logger) *Book {
 	return &Book{ctx, svc, log}
 }
 
+// AbortWithError sends a error response on error.
+func AbortWithError(rw http.ResponseWriter, statusCode int, err error) {
+	rw.WriteHeader(statusCode)
+	fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, statusCode, err.Error())
+}
+
 // Insert calls Insert service method and process POST requests.
 func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	request := model.Book{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		h.log.Error(err.Error())
-		rw.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
+		AbortWithError(rw, http.StatusBadRequest, types.ErrorBadRequest)
 
 		return
 	}
@@ -46,18 +51,15 @@ func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 		h.log.Error(err.Error())
 		switch err {
 		case types.ErrorDuplicateValue:
-			rw.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
+			AbortWithError(rw, http.StatusConflict, types.ErrorDuplicateValue)
 
 			return
 		case types.ErrorBadRequest:
-			rw.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
+			AbortWithError(rw, http.StatusBadRequest, types.ErrorBadRequest)
 
 			return
 		default:
-			rw.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+			AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 			return
 		}
@@ -67,8 +69,7 @@ func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 
 	if err = json.NewEncoder(rw).Encode(insertedBook); err != nil {
 		h.log.Error(err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
@@ -82,8 +83,7 @@ func (h *Book) Get(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bookID, err := uuid.Parse(vars["id"])
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
@@ -93,13 +93,11 @@ func (h *Book) Get(rw http.ResponseWriter, r *http.Request) {
 		h.log.Error(err.Error())
 		switch err {
 		case types.ErrorNotFound:
-			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusNotFound, types.ErrorNotFound.Error())
+			AbortWithError(rw, http.StatusNotFound, types.ErrorNotFound)
 
 			return
 		default:
-			rw.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+			AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 			return
 		}
@@ -107,8 +105,7 @@ func (h *Book) Get(rw http.ResponseWriter, r *http.Request) {
 
 	if err = json.NewEncoder(rw).Encode(&book); err != nil {
 		h.log.Error(err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
@@ -122,8 +119,7 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bookID, err := uuid.Parse(vars["id"])
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
@@ -131,8 +127,7 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 	request := model.Book{}
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
 		h.log.Error(err.Error())
-		rw.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
+		AbortWithError(rw, http.StatusBadRequest, types.ErrorBadRequest)
 
 		return
 	}
@@ -142,23 +137,19 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 		h.log.Error(err.Error())
 		switch err {
 		case types.ErrorNotFound:
-			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusNotFound, types.ErrorNotFound.Error())
+			AbortWithError(rw, http.StatusNotFound, types.ErrorNotFound)
 
 			return
 		case types.ErrorDuplicateValue:
-			rw.WriteHeader(http.StatusConflict)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
+			AbortWithError(rw, http.StatusConflict, types.ErrorDuplicateValue)
 
 			return
 		case types.ErrorBadRequest:
-			rw.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
+			AbortWithError(rw, http.StatusBadRequest, types.ErrorBadRequest)
 
 			return
 		default:
-			rw.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+			AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 			return
 		}
@@ -168,8 +159,7 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 
 	if err = json.NewEncoder(rw).Encode(&updatedBook); err != nil {
 		h.log.Error(err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
@@ -183,8 +173,7 @@ func (h *Book) Delete(rw http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bookID, err := uuid.Parse(vars["id"])
 	if err != nil {
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
@@ -194,13 +183,11 @@ func (h *Book) Delete(rw http.ResponseWriter, r *http.Request) {
 		h.log.Error(err.Error())
 		switch {
 		case errors.Cause(err) == types.ErrorNotFound:
-			rw.WriteHeader(http.StatusNotFound)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusNotFound, types.ErrorNotFound.Error())
+			AbortWithError(rw, http.StatusNotFound, types.ErrorNotFound)
 
 			return
 		default:
-			rw.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+			AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 			return
 		}
@@ -210,8 +197,7 @@ func (h *Book) Delete(rw http.ResponseWriter, r *http.Request) {
 
 	if err = json.NewEncoder(rw).Encode(&deletedBook); err != nil {
 		h.log.Error(err.Error())
-		rw.WriteHeader(http.StatusInternalServerError)
-		fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusInternalServerError, types.ErrorInternalServerError.Error())
+		AbortWithError(rw, http.StatusInternalServerError, types.ErrorInternalServerError)
 
 		return
 	}
