@@ -119,27 +119,6 @@ func TestPostgresBookRepository_Insert(t *testing.T) {
 			expected:      nil,
 			expectedError: types.ErrorDuplicateValue,
 		},
-		{
-			name: "Overflowed the allowed number of characters ",
-			input: model.Book{
-				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
-				Name:        "Introducing Go: Build Reliable, Scalable Programs",
-				DateOfIssue: "2016",
-				Author: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Description: `...`,
-				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
-				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
-				InStock:     true,
-			},
-			expected:      nil,
-			expectedError: types.ErrorInternalServerError,
-		},
 	}
 
 	ctx := context.Background()
@@ -276,27 +255,6 @@ func TestPostgresBookRepository_Update(t *testing.T) {
 			},
 			expected:      nil,
 			expectedError: types.ErrorDuplicateValue,
-		},
-		{
-			name:  "Overflowed the allowed number of characters ",
-			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
-			toUpdate: model.Book{
-				Name:        "Introducing Go: Build Reliable, Scalable Programs",
-				DateOfIssue: "2016",
-				Author: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
-				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
-				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
-				Author Katherine Cox-Buday takes you step-by-step through the process.
-				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
-				and how you can compose primitives within this model to solve problems.
-				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
-				Description: `...`,
-				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
-				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
-				InStock:     true,
-			},
-			expected:      nil,
-			expectedError: types.ErrorInternalServerError,
 		},
 		{
 			name:  "Book not found",
