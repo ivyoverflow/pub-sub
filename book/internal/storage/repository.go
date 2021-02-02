@@ -1,5 +1,5 @@
-// Package repository contains repository interfaces and implementations.
-package repository
+// Package storage contains storage interfaces and implementations.
+package storage
 
 import (
 	"context"

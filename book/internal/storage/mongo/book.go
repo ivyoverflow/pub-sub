@@ -49,8 +49,8 @@ func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book
 	receivedBook := model.Book{}
 	err := r.Collection().FindOne(ctx, filter).Decode(&receivedBook)
 	if err != nil {
-		switch {
-		case err == mongo.ErrNoDocuments:
+		switch err {
+		case mongo.ErrNoDocuments:
 			return nil, types.ErrorNotFound
 		default:
 			return nil, types.ErrorInternalServerError
@@ -87,8 +87,8 @@ func (r *BookRepository) Delete(ctx context.Context, bookID uuid.UUID) (*model.B
 	deletedBook := model.Book{}
 	err := r.Collection().FindOneAndDelete(ctx, filter).Decode(&deletedBook)
 	if err != nil {
-		switch {
-		case err == mongo.ErrNoDocuments:
+		switch err {
+		case mongo.ErrNoDocuments:
 			return nil, types.ErrorNotFound
 		default:
 			return nil, types.ErrorInternalServerError

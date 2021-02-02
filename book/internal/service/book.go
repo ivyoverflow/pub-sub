@@ -8,17 +8,17 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository"
+	"github.com/ivyoverflow/pub-sub/book/internal/storage"
 )
 
 // Book implements all service methods for book.
 type Book struct {
-	repo repository.BookI
+	repo storage.BookI
 	gen  IDGeneratorI
 }
 
 // NewBook returns a new configured Book object.
-func NewBook(repo repository.BookI, gen IDGeneratorI) *Book {
+func NewBook(repo storage.BookI, gen IDGeneratorI) *Book {
 	return &Book{repo, gen}
 }
 

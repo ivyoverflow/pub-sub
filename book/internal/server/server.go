@@ -2,12 +2,10 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 )
 
@@ -18,10 +16,12 @@ type Server struct {
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.ServerConfig, handl *handler.Book) *Server {
+func New(handl *handler.Book) *Server {
+	cfg := NewConfig()
+
 	return &Server{
 		httpServer: &http.Server{
-			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
+			Addr: cfg.GetConnectionURI(),
 		},
 		handl: handl,
 	}

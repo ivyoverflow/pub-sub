@@ -14,9 +14,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Run GolangCI"
+          name: "Migrate installation"
+          command: |
+            go get -tags 'postgres' -u github.com/golang-migrate/migrate/cmd/migrate
+      - run:
+          name: "Init PostgreSQL migrations"
+          command: |
+            migrate -path ./book/internal/storage/postgres/migrations -database postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable up
+      - run:
+          name: "GolangCI installation"
           command: |
             curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.35.2
+      - run:
+          name: "Run GolangCI"
+          command: |
             cd book/ && golangci-lint run -v --timeout 2m
             cd ../server/ && golangci-lint run -v --timeout 2m
       - run:
