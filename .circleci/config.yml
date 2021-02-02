@@ -20,7 +20,7 @@ jobs:
       - run:
           name: "Init PostgreSQL migrations"
           command: |
-            migrate -path ./book/internal/repository/postgres/migrations -database postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable up
+            migrate -path ./book/internal/storage/postgres/migrations -database postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable up
       - run:
           name: "GolangCI installation"
           command: |
