@@ -25,7 +25,7 @@ func NewBook(repo repository.BookI, gen IDGeneratorI) *Book {
 // Insert calls Insert repository method.
 func (s *Book) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
 	if err := Validate(book); err != nil {
-		return nil, types.ErrorBadRequest
+		return nil, types.ErrorValidation
 	}
 
 	book.ID = s.gen.Generate()
@@ -41,7 +41,7 @@ func (s *Book) Get(ctx context.Context, bookID uuid.UUID) (*model.Book, error) {
 // Update calls Update repository method.
 func (s *Book) Update(ctx context.Context, bookID uuid.UUID, book *model.Book) (*model.Book, error) {
 	if err := Validate(book); err != nil {
-		return nil, types.ErrorBadRequest
+		return nil, types.ErrorValidation
 	}
 
 	return s.repo.Update(ctx, bookID, book)

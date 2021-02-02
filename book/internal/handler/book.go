@@ -50,9 +50,9 @@ func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
 
 			return
-		case types.ErrorBadRequest:
+		case types.ErrorValidation:
 			rw.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
+			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorValidation.Error())
 
 			return
 		default:
@@ -151,9 +151,9 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusConflict, types.ErrorDuplicateValue.Error())
 
 			return
-		case types.ErrorBadRequest:
+		case types.ErrorValidation:
 			rw.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorBadRequest.Error())
+			fmt.Fprintf(rw, `{"error": {"statusCode": %d, "message": "%s"}}`, http.StatusBadRequest, types.ErrorValidation.Error())
 
 			return
 		default:

@@ -114,7 +114,7 @@ func TestBookHandler_Insert(t *testing.T) {
 		{
 			name:                    "Invalid JSON body",
 			inputString:             `{}`,
-			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			expectedString:          `{"error": {"statusCode": 400, "message": "received JSON is invalid"}}`,
 			mockBehaviorIDGenerator: func(gen *mock_service.MockIDGeneratorI) {},
 			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *mock_repository.MockBookI) {},
 			expectedStatusCode:      400,
@@ -362,7 +362,7 @@ func TestBookHandler_Update(t *testing.T) {
 			name:           "Invalid JSON body",
 			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputString:    `{}`,
-			expectedString: `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			expectedString: `{"error": {"statusCode": 400, "message": "received JSON is invalid"}}`,
 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock_repository.MockBookI) {
 			},
 			expectedStatusCode: 400,
