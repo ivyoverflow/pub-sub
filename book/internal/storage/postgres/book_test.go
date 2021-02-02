@@ -11,7 +11,7 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository/postgres"
+	"github.com/ivyoverflow/pub-sub/book/internal/storage/postgres"
 )
 
 func clearDB(db *postgres.DB) error {

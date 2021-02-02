@@ -17,9 +17,9 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	mock_repository "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
 	mock_service "github.com/ivyoverflow/pub-sub/book/internal/service/mock"
+	mock_repository "github.com/ivyoverflow/pub-sub/book/internal/storage/mock"
 	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 

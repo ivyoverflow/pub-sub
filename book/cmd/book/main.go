@@ -6,9 +6,9 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	"github.com/ivyoverflow/pub-sub/book/internal/storage/mongo"
 	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 

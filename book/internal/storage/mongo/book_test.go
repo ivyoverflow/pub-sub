@@ -11,7 +11,7 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
+	"github.com/ivyoverflow/pub-sub/book/internal/storage/mongo"
 )
 
 func clearDB(db *mongo.DB) error {
