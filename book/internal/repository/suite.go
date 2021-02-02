@@ -1,3 +1,4 @@
+// Package repository contains repository interfaces and implementations.
 package repository
 
 import (
@@ -12,16 +13,17 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
 )
 
-// Suite ...
+// Suite contains all repository tests.
 type Suite struct {
 	repo BookI
 }
 
-// NewSuite ...
+// NewSuite returns a new configured Suite object.
 func NewSuite(repo BookI) *Suite {
 	return &Suite{repo}
 }
 
+// Run starts all repository tests.
 func (s *Suite) Run(t *testing.T) {
 	s.testInsert(t)
 	s.testGet(t)
@@ -119,14 +121,14 @@ func (s *Suite) testInsert(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for index := range testCases {
 		ctx := context.Background()
-		insertedBook, err := s.repo.Insert(ctx, &testCase.input)
+		insertedBook, err := s.repo.Insert(ctx, &testCases[index].input)
 		if err != nil {
-			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCases[index].expectedError, err)
 		}
 
-		assert.Equal(t, testCase.expected, insertedBook)
+		assert.Equal(t, testCases[index].expected, insertedBook)
 	}
 }
 
@@ -260,14 +262,14 @@ func (s *Suite) testUpdate(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
+	for index := range testCases {
 		ctx := context.Background()
-		updatedBook, err := s.repo.Update(ctx, testCase.input, &testCase.toUpdate)
+		updatedBook, err := s.repo.Update(ctx, testCases[index].input, &testCases[index].toUpdate)
 		if err != nil {
-			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCases[index].expectedError, err)
 		}
 
-		assert.Equal(t, testCase.expected, updatedBook)
+		assert.Equal(t, testCases[index].expected, updatedBook)
 	}
 }
 
