@@ -17,9 +17,9 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	mockrepository "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
+	repomock "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
-	mockservice "github.com/ivyoverflow/pub-sub/book/internal/service/mock"
+	svcmock "github.com/ivyoverflow/pub-sub/book/internal/service/mock"
 	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
@@ -28,9 +28,9 @@ func TestBookHandler_Insert(t *testing.T) {
 		name                    string
 		inputString             string
 		expectedString          string
-		mockBehaviorIDGenerator func(*mockservice.MockIDGeneratorI)
+		mockBehaviorIDGenerator func(*svcmock.MockIDGeneratorI)
 		expectedJSON            *model.Book
-		mockBehaviorBook        func(context.Context, *model.Book, *mockrepository.MockBookI)
+		mockBehaviorBook        func(context.Context, *model.Book, *repomock.MockBookI)
 		expectedStatusCode      int
 	}{
 		{
@@ -39,7 +39,7 @@ func TestBookHandler_Insert(t *testing.T) {
 			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
 `,
 				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
-			mockBehaviorIDGenerator: func(gen *mockservice.MockIDGeneratorI) {
+			mockBehaviorIDGenerator: func(gen *svcmock.MockIDGeneratorI) {
 				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"))
 			},
 			expectedJSON: &model.Book{
@@ -52,7 +52,7 @@ func TestBookHandler_Insert(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Insert(gomock.Any(), expected).Return(expected, nil)
 			},
 			expectedStatusCode: 201,
@@ -63,7 +63,7 @@ func TestBookHandler_Insert(t *testing.T) {
 			expectedString: fmt.Sprintf(`{"id":"%s","name":"Introduction to Go","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
 `,
 				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004")),
-			mockBehaviorIDGenerator: func(gen *mockservice.MockIDGeneratorI) {
+			mockBehaviorIDGenerator: func(gen *svcmock.MockIDGeneratorI) {
 				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"))
 			},
 			expectedJSON: &model.Book{
@@ -76,7 +76,7 @@ func TestBookHandler_Insert(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Insert(gomock.Any(), expected).Return(expected, nil)
 			},
 			expectedStatusCode: 201,
@@ -85,7 +85,7 @@ func TestBookHandler_Insert(t *testing.T) {
 			name:           "Duplicate value",
 			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString: `{"error": {"statusCode": 409, "message": "duplicate value"}}`,
-			mockBehaviorIDGenerator: func(gen *mockservice.MockIDGeneratorI) {
+			mockBehaviorIDGenerator: func(gen *svcmock.MockIDGeneratorI) {
 				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"))
 			},
 			expectedJSON: &model.Book{
@@ -98,7 +98,7 @@ func TestBookHandler_Insert(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Insert(gomock.Any(), expected).Return(nil, types.ErrorDuplicateValue)
 			},
 			expectedStatusCode: 409,
@@ -107,16 +107,16 @@ func TestBookHandler_Insert(t *testing.T) {
 			name:                    "Invalid JSON value type",
 			inputString:             `{"name":"jfjwoaopfopwa","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": 111,"rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
-			mockBehaviorIDGenerator: func(gen *mockservice.MockIDGeneratorI) {},
-			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *mockrepository.MockBookI) {},
+			mockBehaviorIDGenerator: func(gen *svcmock.MockIDGeneratorI) {},
+			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *repomock.MockBookI) {},
 			expectedStatusCode:      400,
 		},
 		{
 			name:                    "Invalid JSON body",
 			inputString:             `{}`,
 			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
-			mockBehaviorIDGenerator: func(gen *mockservice.MockIDGeneratorI) {},
-			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *mockrepository.MockBookI) {},
+			mockBehaviorIDGenerator: func(gen *svcmock.MockIDGeneratorI) {},
+			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *repomock.MockBookI) {},
 			expectedStatusCode:      400,
 		},
 		{
@@ -133,10 +133,10 @@ func TestBookHandler_Insert(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehaviorIDGenerator: func(gen *mockservice.MockIDGeneratorI) {
+			mockBehaviorIDGenerator: func(gen *svcmock.MockIDGeneratorI) {
 				gen.EXPECT().Generate().Return(uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"))
 			},
-			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehaviorBook: func(ctx context.Context, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Insert(gomock.Any(), expected).Return(nil, errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
@@ -147,8 +147,8 @@ func TestBookHandler_Insert(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mockrepository.NewMockBookI(ctrl)
-		gen := mockservice.NewMockIDGeneratorI(ctrl)
+		repo := repomock.NewMockBookI(ctrl)
+		gen := svcmock.NewMockIDGeneratorI(ctrl)
 		testCase.mockBehaviorIDGenerator(gen)
 		ctx := context.Background()
 
@@ -181,7 +181,7 @@ func TestBookHandler_Get(t *testing.T) {
 		inputUUID          uuid.UUID
 		expectedJSON       *model.Book
 		expectedString     string
-		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *mockservice.MockBookI)
+		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *svcmock.MockBookI)
 		expectedStatusCode int
 	}{
 		{
@@ -201,7 +201,7 @@ func TestBookHandler_Get(t *testing.T) {
 			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
 `,
 				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {
 				repo.EXPECT().Get(gomock.Any(), bookID).Return(expected, nil)
 			},
 			expectedStatusCode: 200,
@@ -211,7 +211,7 @@ func TestBookHandler_Get(t *testing.T) {
 			inputStringID:      "wakldlkawdlklakwdlk",
 			expectedJSON:       nil,
 			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
-			mockBehavior:       func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {},
+			mockBehavior:       func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {},
 			expectedStatusCode: 500,
 		},
 		{
@@ -220,7 +220,7 @@ func TestBookHandler_Get(t *testing.T) {
 			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			expectedJSON:   nil,
 			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {
 				repo.EXPECT().Get(gomock.Any(), bookID).Return(nil, types.ErrorNotFound)
 			},
 			expectedStatusCode: 404,
@@ -240,7 +240,7 @@ func TestBookHandler_Get(t *testing.T) {
 				InStock:     true,
 			},
 			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {
 				repo.EXPECT().Get(gomock.Any(), bookID).Return(nil, errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
@@ -251,8 +251,8 @@ func TestBookHandler_Get(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mockservice.NewMockBookI(ctrl)
-		gen := mockservice.NewMockIDGeneratorI(ctrl)
+		repo := svcmock.NewMockBookI(ctrl)
+		gen := svcmock.NewMockIDGeneratorI(ctrl)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, testCase.inputUUID, testCase.expectedJSON, repo)
@@ -286,7 +286,7 @@ func TestBookHandler_Update(t *testing.T) {
 		expectedString     string
 		toUpdate           model.Book
 		expectedJSON       *model.Book
-		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *model.Book, *mockrepository.MockBookI)
+		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *model.Book, *repomock.MockBookI)
 		expectedStatusCode int
 	}{
 		{
@@ -316,7 +316,7 @@ func TestBookHandler_Update(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(expected, nil)
 			},
 			expectedStatusCode: 200,
@@ -337,7 +337,7 @@ func TestBookHandler_Update(t *testing.T) {
 				InStock:     true,
 			},
 			expectedJSON: nil,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(nil, types.ErrorDuplicateValue)
 			},
 			expectedStatusCode: 409,
@@ -347,7 +347,7 @@ func TestBookHandler_Update(t *testing.T) {
 			inputStringID:      "wakldlkawdlklakwdlk",
 			expectedJSON:       nil,
 			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
-			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *model.Book, *mockrepository.MockBookI) {},
+			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *model.Book, *repomock.MockBookI) {},
 			expectedStatusCode: 500,
 		},
 		{
@@ -355,7 +355,7 @@ func TestBookHandler_Update(t *testing.T) {
 			inputStringID:      "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputString:        `{"name":"jfjwoaopfopwa","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": 111,"rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString:     `{"error": {"statusCode": 400, "message": "bad request"}}`,
-			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *model.Book, *mockrepository.MockBookI) {},
+			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *model.Book, *repomock.MockBookI) {},
 			expectedStatusCode: 400,
 		},
 		{
@@ -363,7 +363,7 @@ func TestBookHandler_Update(t *testing.T) {
 			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputString:    `{}`,
 			expectedString: `{"error": {"statusCode": 400, "message": "bad request"}}`,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *repomock.MockBookI) {
 			},
 			expectedStatusCode: 400,
 		},
@@ -383,7 +383,7 @@ func TestBookHandler_Update(t *testing.T) {
 				InStock:     true,
 			},
 			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(expected, types.ErrorNotFound)
 			},
 			expectedStatusCode: 404,
@@ -403,7 +403,7 @@ func TestBookHandler_Update(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mockrepository.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *repomock.MockBookI) {
 				repo.EXPECT().Update(gomock.Any(), bookID, book).Return(nil, errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
@@ -414,8 +414,8 @@ func TestBookHandler_Update(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mockrepository.NewMockBookI(ctrl)
-		gen := mockservice.NewMockIDGeneratorI(ctrl)
+		repo := repomock.NewMockBookI(ctrl)
+		gen := svcmock.NewMockIDGeneratorI(ctrl)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, testCase.inputUUID, &testCase.toUpdate, testCase.expectedJSON, repo)
@@ -447,7 +447,7 @@ func TestBookHandler_Delete(t *testing.T) {
 		inputUUID          uuid.UUID
 		expectedJSON       *model.Book
 		expectedString     string
-		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *mockservice.MockBookI)
+		mockBehavior       func(context.Context, uuid.UUID, *model.Book, *svcmock.MockBookI)
 		expectedStatusCode int
 	}{
 		{
@@ -467,7 +467,7 @@ func TestBookHandler_Delete(t *testing.T) {
 			expectedString: fmt.Sprintf(`{"id":"%s","name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":"99.99","price":"199.99","inStock":true}
 `,
 				uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003")),
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {
 				repo.EXPECT().Delete(gomock.Any(), bookID).Return(expected, nil)
 			},
 			expectedStatusCode: 200,
@@ -477,7 +477,7 @@ func TestBookHandler_Delete(t *testing.T) {
 			inputStringID:      "wakldlkawdlklakwdlk",
 			expectedJSON:       nil,
 			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
-			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *mockservice.MockBookI) {},
+			mockBehavior:       func(context.Context, uuid.UUID, *model.Book, *svcmock.MockBookI) {},
 			expectedStatusCode: 500,
 		},
 		{
@@ -486,7 +486,7 @@ func TestBookHandler_Delete(t *testing.T) {
 			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			expectedJSON:   nil,
 			expectedString: `{"error": {"statusCode": 404, "message": "not found"}}`,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {
 				repo.EXPECT().Delete(gomock.Any(), bookID).Return(expected, types.ErrorNotFound)
 			},
 			expectedStatusCode: 404,
@@ -506,7 +506,7 @@ func TestBookHandler_Delete(t *testing.T) {
 				InStock:     true,
 			},
 			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mockservice.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *svcmock.MockBookI) {
 				repo.EXPECT().Delete(gomock.Any(), bookID).Return(nil, errors.New("something went wrong"))
 			},
 			expectedStatusCode: 500,
@@ -517,8 +517,8 @@ func TestBookHandler_Delete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mockservice.NewMockBookI(ctrl)
-		gen := mockservice.NewMockIDGeneratorI(ctrl)
+		repo := svcmock.NewMockBookI(ctrl)
+		gen := svcmock.NewMockIDGeneratorI(ctrl)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, testCase.inputUUID, testCase.expectedJSON, repo)
