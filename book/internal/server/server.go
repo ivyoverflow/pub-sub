@@ -14,11 +14,11 @@ import (
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
-	handl      *handler.Book
+	handl      *handler.BookController
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.ServerConfig, handl *handler.Book) *Server {
+func New(cfg *config.ServerConfig, handl *handler.BookController) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),

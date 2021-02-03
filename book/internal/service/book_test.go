@@ -20,7 +20,7 @@ func TestBookService_Insert(t *testing.T) {
 		name          string
 		input         model.Book
 		expected      *model.Book
-		mockBehavior  func(context.Context, *model.Book, *model.Book, *mock.MockBookI)
+		mockBehavior  func(context.Context, *model.Book, *model.Book, *mock.MockBookerRepository)
 		expectedError error
 	}{
 		{
@@ -45,7 +45,7 @@ func TestBookService_Insert(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehavior: func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Insert(ctx, book).Return(expected, nil)
 			},
 			expectedError: nil,
@@ -63,7 +63,7 @@ func TestBookService_Insert(t *testing.T) {
 				InStock:     true,
 			},
 			expected: nil,
-			mockBehavior: func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Insert(ctx, book).Return(expected, types.ErrorDuplicateValue)
 			},
 			expectedError: types.ErrorDuplicateValue,
@@ -78,7 +78,7 @@ func TestBookService_Insert(t *testing.T) {
 				Description: `...`,
 			},
 			expected:      nil,
-			mockBehavior:  func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {},
+			mockBehavior:  func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookerRepository) {},
 			expectedError: types.ErrorBadRequest,
 		},
 	}
@@ -87,9 +87,9 @@ func TestBookService_Insert(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mock.NewMockBookI(ctrl)
-		gen := service.NewIDGenerator()
-		svc := service.NewBook(repo, gen)
+		repo := mock.NewMockBookerRepository(ctrl)
+		gen := service.NewUUIDGenerator()
+		svc := service.NewBookController(repo, gen)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, &testCase.input, testCase.expected, repo)
@@ -108,7 +108,7 @@ func TestBookService_Get(t *testing.T) {
 		name          string
 		input         uuid.UUID
 		expected      *model.Book
-		mockBehavior  func(context.Context, uuid.UUID, *model.Book, *mock.MockBookI)
+		mockBehavior  func(context.Context, uuid.UUID, *model.Book, *mock.MockBookerRepository)
 		expectedError error
 	}{
 		{
@@ -124,7 +124,7 @@ func TestBookService_Get(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Get(ctx, bookID).Return(expected, nil)
 			},
 			expectedError: nil,
@@ -133,7 +133,7 @@ func TestBookService_Get(t *testing.T) {
 			name:     "Book not found",
 			input:    uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
 			expected: nil,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Get(ctx, bookID).Return(expected, types.ErrorNotFound)
 			},
 			expectedError: types.ErrorNotFound,
@@ -144,9 +144,9 @@ func TestBookService_Get(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mock.NewMockBookI(ctrl)
-		gen := service.NewIDGenerator()
-		svc := service.NewBook(repo, gen)
+		repo := mock.NewMockBookerRepository(ctrl)
+		gen := service.NewUUIDGenerator()
+		svc := service.NewBookController(repo, gen)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, testCase.input, testCase.expected, repo)
@@ -166,7 +166,7 @@ func TestBookService_Update(t *testing.T) {
 		input         uuid.UUID
 		toUpdate      model.Book
 		expected      *model.Book
-		mockBehavior  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookI)
+		mockBehavior  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookerRepository)
 		expectedError error
 	}{
 		{
@@ -191,7 +191,7 @@ func TestBookService_Update(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Update(ctx, bookID, book).Return(expected, nil)
 			},
 			expectedError: nil,
@@ -210,7 +210,7 @@ func TestBookService_Update(t *testing.T) {
 				InStock:     true,
 			},
 			expected: nil,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Update(ctx, bookID, book).Return(expected, types.ErrorNotFound)
 			},
 			expectedError: types.ErrorNotFound,
@@ -225,7 +225,7 @@ func TestBookService_Update(t *testing.T) {
 				Description: `...`,
 			},
 			expected:      nil,
-			mockBehavior:  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookI) {},
+			mockBehavior:  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookerRepository) {},
 			expectedError: types.ErrorBadRequest,
 		},
 	}
@@ -234,9 +234,9 @@ func TestBookService_Update(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mock.NewMockBookI(ctrl)
-		gen := service.NewIDGenerator()
-		svc := service.NewBook(repo, gen)
+		repo := mock.NewMockBookerRepository(ctrl)
+		gen := service.NewUUIDGenerator()
+		svc := service.NewBookController(repo, gen)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, testCase.input, &testCase.toUpdate, testCase.expected, repo)
@@ -255,7 +255,7 @@ func TestBookService_Delete(t *testing.T) {
 		name          string
 		input         uuid.UUID
 		expected      *model.Book
-		mockBehavior  func(context.Context, uuid.UUID, *model.Book, *mock.MockBookI)
+		mockBehavior  func(context.Context, uuid.UUID, *model.Book, *mock.MockBookerRepository)
 		expectedError error
 	}{
 		{
@@ -271,7 +271,7 @@ func TestBookService_Delete(t *testing.T) {
 				Price:       model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
 				InStock:     true,
 			},
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Delete(ctx, bookID).Return(expected, nil)
 			},
 			expectedError: nil,
@@ -280,7 +280,7 @@ func TestBookService_Delete(t *testing.T) {
 			name:     "Book not found",
 			input:    uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
 			expected: nil,
-			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookI) {
+			mockBehavior: func(ctx context.Context, bookID uuid.UUID, expected *model.Book, repo *mock.MockBookerRepository) {
 				repo.EXPECT().Delete(ctx, bookID).Return(expected, types.ErrorNotFound)
 			},
 			expectedError: types.ErrorNotFound,
@@ -291,9 +291,9 @@ func TestBookService_Delete(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		repo := mock.NewMockBookI(ctrl)
-		gen := service.NewIDGenerator()
-		svc := service.NewBook(repo, gen)
+		repo := mock.NewMockBookerRepository(ctrl)
+		gen := service.NewUUIDGenerator()
+		svc := service.NewBookController(repo, gen)
 		ctx := context.Background()
 
 		testCase.mockBehavior(ctx, testCase.input, testCase.expected, repo)

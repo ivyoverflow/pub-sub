@@ -26,11 +26,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	bookRepo := mongo.NewBookRepository(db)
-	gen := service.NewIDGenerator()
-	bookSvc := service.NewBook(bookRepo, gen)
-	bookHandl := handler.NewBook(ctx, bookSvc, log)
-	srv := server.New(&cfg.Server, bookHandl)
+	repo := mongo.NewBookRepository(db)
+	gen := service.NewUUIDGenerator()
+	svc := service.NewBookController(repo, gen)
+	ctrl := handler.NewBookController(ctx, svc, log)
+	srv := server.New(&cfg.Server, ctrl)
 	if err = srv.Run(); err != nil {
 		log.Fatal(err.Error())
 	}

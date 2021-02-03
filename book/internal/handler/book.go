@@ -17,20 +17,20 @@ import (
 	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
-// Book contains all handlers for book.
-type Book struct {
+// BookController contains all handlers for book.
+type BookController struct {
 	ctx context.Context
-	svc service.BookI
+	svc service.Booker
 	log *logger.Logger
 }
 
-// NewBook returns a new configured Book object.
-func NewBook(ctx context.Context, svc service.BookI, log *logger.Logger) *Book {
-	return &Book{ctx, svc, log}
+// NewBookController returns a new configured Book object.
+func NewBookController(ctx context.Context, svc service.Booker, log *logger.Logger) *BookController {
+	return &BookController{ctx, svc, log}
 }
 
 // Insert calls Insert service method and process POST requests.
-func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
+func (h *BookController) Insert(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	request := model.Book{}
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -77,7 +77,7 @@ func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 }
 
 // Get calls Get service method and process GET requests.
-func (h *Book) Get(rw http.ResponseWriter, r *http.Request) {
+func (h *BookController) Get(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID, err := uuid.Parse(vars["id"])
@@ -117,7 +117,7 @@ func (h *Book) Get(rw http.ResponseWriter, r *http.Request) {
 }
 
 // Update calls Update service method and process UPDATE requests.
-func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
+func (h *BookController) Update(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID, err := uuid.Parse(vars["id"])
@@ -178,7 +178,7 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 }
 
 // Delete calls Delete service method and process DELETE requests.
-func (h *Book) Delete(rw http.ResponseWriter, r *http.Request) {
+func (h *BookController) Delete(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "application/json")
 	vars := mux.Vars(r)
 	bookID, err := uuid.Parse(vars["id"])
