@@ -11,8 +11,8 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	mock "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	mock "github.com/ivyoverflow/pub-sub/book/internal/storage/mock"
 )
 
 func TestBookService_Insert(t *testing.T) {

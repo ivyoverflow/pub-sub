@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,6 +25,8 @@ func RunMigration(ctx context.Context, db *mongo.Database) error {
 	}
 
 	if _, err := db.Collection("books").Indexes().CreateMany(ctx, indexes); err != nil {
+		log.Println(err.Error())
+
 		return types.ErrorMigrate
 	}
 

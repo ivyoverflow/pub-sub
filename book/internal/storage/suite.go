@@ -1,4 +1,5 @@
-package mongo_test
+// Package storage contains repository interfaces and implementations.
+package storage
 
 import (
 	"context"
@@ -7,34 +8,30 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/bson"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
-	"github.com/ivyoverflow/pub-sub/book/internal/lib/constants"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 )
 
-func newMongoTestConfig() *config.MongoConfig {
-	return &config.MongoConfig{
-		Host:     constants.MongoHost,
-		Port:     constants.MongoPort,
-		Name:     constants.MongoName,
-		User:     constants.MongoUser,
-		Password: constants.MongoPassword,
-	}
+// Suite contains all repository tests.
+type Suite struct {
+	repo BookI
 }
 
-func clearDB(db *mongo.DB) error {
-	if _, err := db.Collection("books").DeleteMany(context.Background(), bson.M{}); err != nil {
-		return err
-	}
-
-	return nil
+// NewSuite returns a new configured Suite object.
+func NewSuite(repo BookI) *Suite {
+	return &Suite{repo}
 }
 
-func TestMongoBookRepository_Insert(t *testing.T) {
+// Run starts all repository tests.
+func (s *Suite) Run(t *testing.T) {
+	s.testInsert(t)
+	s.testGet(t)
+	s.testUpdate(t)
+	s.testDelete(t)
+}
+
+func (s *Suite) testInsert(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         model.Book
@@ -104,7 +101,7 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 		{
 			name: "Duplicate value",
 			input: model.Book{
-				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120004"),
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 				Name:        "Concurrency in Go: Tools and Techniques for Developers",
 				DateOfIssue: "2017",
 				Author:      "Katherine Cox-Buday",
@@ -124,29 +121,18 @@ func TestMongoBookRepository_Insert(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
-	if err != nil {
-		t.Errorf("Mongo connection throws an error: %v", err)
-	}
-
-	if err := clearDB(db); err != nil {
-		t.Errorf("ClearDB function throws an error: %v", err)
-	}
-
-	repo := mongo.NewBookRepository(db)
-	for _, testCase := range testCases {
-		receivedBook, err := repo.Insert(ctx, &testCase.input)
+	for index := range testCases {
+		ctx := context.Background()
+		insertedBook, err := s.repo.Insert(ctx, &testCases[index].input)
 		if err != nil {
-			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCases[index].expectedError, err)
 		}
 
-		assert.Equal(t, testCase.expected, receivedBook)
+		assert.Equal(t, testCases[index].expected, insertedBook)
 	}
 }
 
-func TestMongoBookRepository_Get(t *testing.T) {
+func (s *Suite) testGet(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         uuid.UUID
@@ -182,16 +168,9 @@ func TestMongoBookRepository_Get(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
-	if err != nil {
-		t.Errorf("Mongo connection throws an error: %v", err)
-	}
-
-	repo := mongo.NewBookRepository(db)
 	for _, testCase := range testCases {
-		receivedBook, err := repo.Get(ctx, testCase.input)
+		ctx := context.Background()
+		receivedBook, err := s.repo.Get(ctx, testCase.input)
 		if err != nil {
 			assert.Equal(t, testCase.expectedError, err)
 		}
@@ -200,7 +179,7 @@ func TestMongoBookRepository_Get(t *testing.T) {
 	}
 }
 
-func TestMongoBookRepository_Update(t *testing.T) {
+func (s *Suite) testUpdate(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         uuid.UUID
@@ -212,23 +191,35 @@ func TestMongoBookRepository_Update(t *testing.T) {
 			name:  "OK",
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			toUpdate: model.Book{
-				Name:        "Introducing Go",
-				DateOfIssue: "2016",
-				Author:      "Caleb Doxsey",
-				Description: `...`,
-				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
-				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
-				InStock:     true,
+				Name:        "Concurrency in Go: TTD",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
+				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
+				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
+				Author Katherine Cox-Buday takes you step-by-step through the process.
+				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
+				and how you can compose primitives within this model to solve problems.
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock: true,
 			},
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
-				Name:        "Introducing Go",
-				DateOfIssue: "2016",
-				Author:      "Caleb Doxsey",
-				Description: `...`,
-				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
-				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
-				InStock:     true,
+				Name:        "Concurrency in Go: TTD",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
+				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
+				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
+				Author Katherine Cox-Buday takes you step-by-step through the process.
+				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
+				and how you can compose primitives within this model to solve problems.
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock: true,
 			},
 			expectedError: nil,
 		},
@@ -236,7 +227,7 @@ func TestMongoBookRepository_Update(t *testing.T) {
 			name:  "Duplicate value",
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
 			toUpdate: model.Book{
-				Name:        "Introducing Go",
+				Name:        "Concurrency in Go: TTD",
 				DateOfIssue: "2016",
 				Author:      "Caleb Doxsey",
 				Description: `...`,
@@ -248,32 +239,41 @@ func TestMongoBookRepository_Update(t *testing.T) {
 			expectedError: types.ErrorDuplicateValue,
 		},
 		{
-			name:          "Book not found",
-			input:         uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"),
+			name:  "Book not found",
+			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120005"),
+			toUpdate: model.Book{
+				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
+				Name:        "Concurrency in Go: TTD",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
+				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
+				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
+				Author Katherine Cox-Buday takes you step-by-step through the process.
+				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
+				and how you can compose primitives within this model to solve problems.
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock: true,
+			},
 			expected:      nil,
 			expectedError: types.ErrorNotFound,
 		},
 	}
 
-	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
-	if err != nil {
-		t.Errorf("Mongo connection throws an error: %v", err)
-	}
-
-	repo := mongo.NewBookRepository(db)
-	for _, testCase := range testCases {
-		updatedBook, err := repo.Update(ctx, testCase.input, &testCase.toUpdate)
+	for index := range testCases {
+		ctx := context.Background()
+		updatedBook, err := s.repo.Update(ctx, testCases[index].input, &testCases[index].toUpdate)
 		if err != nil {
-			assert.Equal(t, testCase.expectedError, err)
+			assert.Equal(t, testCases[index].expectedError, err)
 		}
 
-		assert.Equal(t, testCase.expected, updatedBook)
+		assert.Equal(t, testCases[index].expected, updatedBook)
 	}
 }
 
-func TestMongoBookRepository_Delete(t *testing.T) {
+func (s *Suite) testDelete(t *testing.T) {
 	testCases := []struct {
 		name          string
 		input         uuid.UUID
@@ -285,13 +285,19 @@ func TestMongoBookRepository_Delete(t *testing.T) {
 			input: uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			expected: &model.Book{
 				ID:          uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
-				Name:        "Introducing Go",
-				DateOfIssue: "2016",
-				Author:      "Caleb Doxsey",
-				Description: `...`,
-				Rating:      model.Decimal{Decimal: decimal.NewFromFloat(45.99)},
-				Price:       model.Decimal{Decimal: decimal.NewFromFloat(129.24)},
-				InStock:     true,
+				Name:        "Concurrency in Go: TTD",
+				DateOfIssue: "2017",
+				Author:      "Katherine Cox-Buday",
+				Description: `Concurrency can be notoriously difficult to get right, but fortunately, the Go open source programming
+				language makes working with concurrency tractable and even easy. If you’re a developer familiar with Go,
+				this practical book demonstrates best practices and patterns to help you incorporate concurrency into your systems.
+				Author Katherine Cox-Buday takes you step-by-step through the process.
+				You’ll understand how Go chooses to model concurrency, what issues arise from this model,
+				and how you can compose primitives within this model to solve problems.
+				Learn the skills and tooling you need to confidently write and implement concurrent systems of any size.`,
+				Rating:  model.Decimal{Decimal: decimal.NewFromFloat(99.99)},
+				Price:   model.Decimal{Decimal: decimal.NewFromFloat(199.99)},
+				InStock: true,
 			},
 			expectedError: nil,
 		},
@@ -303,16 +309,9 @@ func TestMongoBookRepository_Delete(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	cfg := newMongoTestConfig()
-	db, err := mongo.New(ctx, cfg)
-	if err != nil {
-		t.Errorf("Mongo connection throws an error: %v", err)
-	}
-
-	repo := mongo.NewBookRepository(db)
 	for _, testCase := range testCases {
-		deletedBook, err := repo.Delete(ctx, testCase.input)
+		ctx := context.Background()
+		deletedBook, err := s.repo.Delete(ctx, testCase.input)
 		if err != nil {
 			assert.Equal(t, testCase.expectedError, err)
 		}

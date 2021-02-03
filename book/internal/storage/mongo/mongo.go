@@ -8,7 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 )
 
@@ -18,8 +17,9 @@ type DB struct {
 }
 
 // New connects to the MongoDB database and returns a new mongo.Database object or an error.
-func New(ctx context.Context, cfg *config.MongoConfig) (*DB, error) {
-	clt, err := mongo.NewClient(options.Client().ApplyURI(cfg.GetMongoConnectionURI()))
+func New(ctx context.Context) (*DB, error) {
+	cfg := NewConfig()
+	clt, err := mongo.NewClient(options.Client().ApplyURI(cfg.GetConnectionURI()))
 	if err != nil {
 		return nil, types.ErrorMongoConnectionRefused
 	}
