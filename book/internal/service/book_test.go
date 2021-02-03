@@ -79,7 +79,7 @@ func TestBookService_Insert(t *testing.T) {
 			},
 			expected:      nil,
 			mockBehavior:  func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookI) {},
-			expectedError: types.ErrorBadRequest,
+			expectedError: types.ErrorValidation,
 		},
 	}
 
@@ -226,7 +226,7 @@ func TestBookService_Update(t *testing.T) {
 			},
 			expected:      nil,
 			mockBehavior:  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookI) {},
-			expectedError: types.ErrorBadRequest,
+			expectedError: types.ErrorValidation,
 		},
 	}
 

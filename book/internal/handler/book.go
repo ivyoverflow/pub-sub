@@ -54,8 +54,8 @@ func (h *Book) Insert(rw http.ResponseWriter, r *http.Request) {
 			AbortWithError(rw, http.StatusConflict, types.ErrorDuplicateValue)
 
 			return
-		case types.ErrorBadRequest:
-			AbortWithError(rw, http.StatusBadRequest, types.ErrorBadRequest)
+		case types.ErrorValidation:
+			AbortWithError(rw, http.StatusBadRequest, types.ErrorValidation)
 
 			return
 		default:
@@ -144,8 +144,8 @@ func (h *Book) Update(rw http.ResponseWriter, r *http.Request) {
 			AbortWithError(rw, http.StatusConflict, types.ErrorDuplicateValue)
 
 			return
-		case types.ErrorBadRequest:
-			AbortWithError(rw, http.StatusBadRequest, types.ErrorBadRequest)
+		case types.ErrorValidation:
+			AbortWithError(rw, http.StatusBadRequest, types.ErrorValidation)
 
 			return
 		default:

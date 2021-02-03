@@ -35,7 +35,7 @@ func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.B
 		case strings.Contains(err.Error(), "unique constraint"):
 			return nil, types.ErrorDuplicateValue
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
@@ -53,7 +53,7 @@ func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book
 		case sql.ErrNoRows:
 			return nil, types.ErrorNotFound
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
@@ -74,7 +74,7 @@ func (r *BookRepository) Update(ctx context.Context, bookID uuid.UUID, book *mod
 		case strings.Contains(err.Error(), "unique constraint"):
 			return nil, types.ErrorDuplicateValue
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
@@ -92,7 +92,7 @@ func (r *BookRepository) Delete(ctx context.Context, bookID uuid.UUID) (*model.B
 		case sql.ErrNoRows:
 			return nil, types.ErrorNotFound
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
