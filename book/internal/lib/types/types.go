@@ -27,4 +27,5 @@ var (
 	ErrorMongoConnectionRefused    = errors.New("mongodb connection refused")
 	ErrorPostgresConnectionRefused = errors.New("postgres connection refused")
 	ErrorMigrate                   = errors.New("migrations cannot start")
+	ErrorConfigInitialization      = errors.New("config initialization failed")
 )
