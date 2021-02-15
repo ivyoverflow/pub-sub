@@ -1,2 +1,2 @@
-cd Library/ && \
+cd book/ && \
     golangci-lint run
