@@ -13,7 +13,12 @@
 ```bash
 docker-compose up -d
 ```
-🧁  Run tests with the following command:
+🧁  Run tests with the following commands:<br>
+To initialize PostgreSQL migrations:
+```bash
+migrate -path ./book/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
+```
+To run tests:
 ```bash
 make test
 ```
@@ -23,8 +28,7 @@ make test
 circleci local execute --job build
 ```
 ## 📌 How to run services?
-
->💡 WARNING: Before trying to run anything, you must have the following environment variables:
+>💡 WARNING: before trying to run anything, you must have the following environment variables:
 ```bash
 # MongoDB environment variables.
 export MONGOHOST="<YOUR HOST>"
@@ -43,6 +47,9 @@ export PGSSLMODE="<YOUR SSL MODE>"
 export ADDR="<YOUR HOST>"
 export PORT="<YOUR PORT>"
 ```
-> 💡 Further steps will be described in the future.
+>💡 WARNING: you also need to initialize PostgreSQL migrations:
+```bash
+migrate -path ./book/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
+```
 ## 🚀 Contributors
 [👨🏻‍🎓 ivyoverflow](https://github.com/ivyoverflow) &&  [👨🏻‍🚀 kiryalovik](https://github.com/kiryalovik)

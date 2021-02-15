@@ -21,7 +21,7 @@ docker-down:
 	docker-compose stop && \
 		docker-compose rm
 
-test: docker-up
+test:
 	sh book/scripts/test.sh && \
 		sh server/scripts/test.sh
 
