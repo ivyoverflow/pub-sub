@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   mongo:
+    restart: on-failure
     image: mongo:4.4.3
     container_name: mongo
     ports:
@@ -11,10 +12,10 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=qwerty
 
   postgres:
+    restart: on-failure
     image: postgres:9.6.20
     container_name: postgres
     ports:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=qwerty
-    command: migrate -path ./book/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
