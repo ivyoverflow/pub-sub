@@ -3,16 +3,16 @@
 .DEFAULT_GOAL := build
 
 build:
-	sh book/scripts/build.sh && \
-		sh server/scripts/build.sh
+	sh api/scripts/build.sh && \
+		sh notifier/scripts/build.sh
 
 lint:
-	sh book/scripts/lint.sh && \
-		sh server/scripts/lint.sh
+	sh api/scripts/lint.sh && \
+		sh notifier/scripts/lint.sh
 
 tidy:
-	sh book/scripts/tidy.sh && \
-		sh server/scripts/tidy.sh
+	sh api/scripts/tidy.sh && \
+		sh notifier/scripts/tidy.sh
 
 docker-up:
 	docker-compose up -d
@@ -22,9 +22,9 @@ docker-down:
 		docker-compose rm
 
 test:
-	sh book/scripts/test.sh && \
-		sh server/scripts/test.sh
+	sh api/scripts/test.sh && \
+		sh notifier/scripts/test.sh
 
 clear:
-	sh book/scripts/clear.sh && \
-		sh server/scripts/clear.sh
+	sh api/scripts/clear.sh && \
+		sh notifier/scripts/clear.sh
