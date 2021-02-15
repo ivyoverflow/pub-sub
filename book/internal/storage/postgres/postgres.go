@@ -2,9 +2,11 @@
 package postgres
 
 import (
+	"context"
+	"log"
+
 	"github.com/jmoiron/sqlx"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 )
 
@@ -14,18 +16,19 @@ type DB struct {
 }
 
 // New connects to the PostgreSQL database and returns a new sqlx.DB object or an error.
-func New(cfg *config.PostgresConfig) (*DB, error) {
-	db, err := sqlx.Open("postgres", cfg.GetPostgresConnectionURI())
+func New(ctx context.Context) (*DB, error) {
+	cfg := NewConfig()
+	db, err := sqlx.Open("postgres", cfg.GetConnectionURI())
 	if err != nil {
+		log.Println(err.Error())
+
 		return nil, types.ErrorPostgresConnectionRefused
 	}
 
-	if err := db.Ping(); err != nil {
-		return nil, types.ErrorPostgresConnectionRefused
-	}
+	if err := db.PingContext(ctx); err != nil {
+		log.Println(err.Error())
 
-	if err := RunMigration(cfg); err != nil {
-		return nil, err
+		return nil, types.ErrorPostgresConnectionRefused
 	}
 
 	return &DB{db}, nil

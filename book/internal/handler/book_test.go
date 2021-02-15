@@ -17,9 +17,9 @@ import (
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	repomock "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
 	svcmock "github.com/ivyoverflow/pub-sub/book/internal/service/mock"
+	repomock "github.com/ivyoverflow/pub-sub/book/internal/storage/mock"
 	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
@@ -82,7 +82,7 @@ func TestBookHandler_Insert(t *testing.T) {
 			expectedStatusCode: 201,
 		},
 		{
-			name:           "Duplicate value",
+			name:           "Insert method throws an error: duplicate value",
 			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString: `{"error": {"statusCode": 409, "message": "duplicate value"}}`,
 			mockBehaviorIDGenerator: func(gen *svcmock.MockGeneratorService) {
@@ -104,7 +104,7 @@ func TestBookHandler_Insert(t *testing.T) {
 			expectedStatusCode: 409,
 		},
 		{
-			name:                    "Invalid JSON value type",
+			name:                    "Insert method throws an error: invalid JSON value type",
 			inputString:             `{"name":"jfjwoaopfopwa","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": 111,"rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
 			mockBehaviorIDGenerator: func(gen *svcmock.MockGeneratorService) {},
@@ -112,15 +112,15 @@ func TestBookHandler_Insert(t *testing.T) {
 			expectedStatusCode:      400,
 		},
 		{
-			name:                    "Invalid JSON body",
+			name:                    "Insert method throws an error: invalid JSON body",
 			inputString:             `{}`,
-			expectedString:          `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			expectedString:          `{"error": {"statusCode": 400, "message": "received JSON is invalid"}}`,
 			mockBehaviorIDGenerator: func(gen *svcmock.MockGeneratorService) {},
 			mockBehaviorBook:        func(ctx context.Context, expected *model.Book, repo *repomock.MockBookerRepository) {},
 			expectedStatusCode:      400,
 		},
 		{
-			name:           "Service error",
+			name:           "Insert method throws an error: internal service error",
 			inputString:    `{"name":"Hello World","dateOfIssue":"2017","author":"John Bob","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString: `{"error": {"statusCode": 500, "message": "internal server error"}}`,
 			expectedJSON: &model.Book{
@@ -144,33 +144,32 @@ func TestBookHandler_Insert(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		ctrl := gomock.NewController(t)
-		defer ctrl.Finish()
+		testCase := testCase
+		t.Run(testCase.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
 
-		repo := repomock.NewMockBookerRepository(ctrl)
-		gen := svcmock.NewMockGeneratorService(ctrl)
-		testCase.mockBehaviorIDGenerator(gen)
-		ctx := context.Background()
+			repo := repomock.NewMockBookerRepository(ctrl)
+			gen := svcmock.NewMockGeneratorService(ctrl)
+			testCase.mockBehaviorIDGenerator(gen)
+			ctx := context.Background()
+			testCase.mockBehaviorBook(ctx, testCase.expectedJSON, repo)
+			svc := service.NewBookController(repo, gen)
+			log, err := logger.New()
+			if err != nil {
+				t.Errorf("Logger initialization throws an error: %v", err)
+			}
 
-		testCase.mockBehaviorBook(ctx, testCase.expectedJSON, repo)
+			handl := handler.NewBookController(ctx, svc, log)
+			router := mux.NewRouter()
+			router.HandleFunc("/v1/book/", handl.Insert)
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequest("POST", "/v1/book/", bytes.NewBufferString(testCase.inputString))
+			router.ServeHTTP(rec, req)
 
-		svc := service.NewBookController(repo, gen)
-		log, err := logger.New()
-		if err != nil {
-			t.Errorf("Logger initialization throws an error: %v", err)
-		}
-
-		handl := handler.NewBookController(ctx, svc, log)
-		router := mux.NewRouter()
-		router.HandleFunc("/v1/book/", handl.Insert)
-
-		rec := httptest.NewRecorder()
-		req := httptest.NewRequest("POST", "/v1/book/", bytes.NewBufferString(testCase.inputString))
-
-		router.ServeHTTP(rec, req)
-
-		assert.Equal(t, testCase.expectedStatusCode, rec.Code)
-		assert.Equal(t, testCase.expectedString, rec.Body.String())
+			assert.Equal(t, testCase.expectedStatusCode, rec.Code)
+			assert.Equal(t, testCase.expectedString, rec.Body.String())
+		})
 	}
 }
 
@@ -207,7 +206,7 @@ func TestBookHandler_Get(t *testing.T) {
 			expectedStatusCode: 200,
 		},
 		{
-			name:               "Invalid UUID ID",
+			name:               "Book Get service method throws an error: invalid UUID ID",
 			inputStringID:      "wakldlkawdlklakwdlk",
 			expectedJSON:       nil,
 			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
@@ -215,7 +214,7 @@ func TestBookHandler_Get(t *testing.T) {
 			expectedStatusCode: 500,
 		},
 		{
-			name:           "Book not found",
+			name:           "Book Get service method throws an error: book not found",
 			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120002",
 			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120002"),
 			expectedJSON:   nil,
@@ -226,7 +225,7 @@ func TestBookHandler_Get(t *testing.T) {
 			expectedStatusCode: 404,
 		},
 		{
-			name:          "OK",
+			name:          "Book Get service method throws an error: internal service error",
 			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
 			expectedJSON: &model.Book{
@@ -322,7 +321,7 @@ func TestBookHandler_Update(t *testing.T) {
 			expectedStatusCode: 200,
 		},
 		{
-			name:           "Duplicate value",
+			name:           "Book Update service method throws an error: duplicate value",
 			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
 			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
@@ -343,7 +342,7 @@ func TestBookHandler_Update(t *testing.T) {
 			expectedStatusCode: 409,
 		},
 		{
-			name:               "Invalid UUID ID",
+			name:               "Book Update service method throws an error: invalid UUID ID",
 			inputStringID:      "wakldlkawdlklakwdlk",
 			expectedJSON:       nil,
 			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,
@@ -351,7 +350,7 @@ func TestBookHandler_Update(t *testing.T) {
 			expectedStatusCode: 500,
 		},
 		{
-			name:               "Invalid JSON value type",
+			name:               "Book Update service method throws an error: invalid JSON value type",
 			inputStringID:      "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputString:        `{"name":"jfjwoaopfopwa","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": 111,"rating":99.99,"price":199.99,"inStock":true}`,
 			expectedString:     `{"error": {"statusCode": 400, "message": "bad request"}}`,
@@ -359,16 +358,16 @@ func TestBookHandler_Update(t *testing.T) {
 			expectedStatusCode: 400,
 		},
 		{
-			name:           "Invalid JSON body",
+			name:           "Book Update service method throws an error: invalid JSON body",
 			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputString:    `{}`,
-			expectedString: `{"error": {"statusCode": 400, "message": "bad request"}}`,
+			expectedString: `{"error": {"statusCode": 400, "message": "received JSON is invalid"}}`,
 			mockBehavior: func(ctx context.Context, bookID uuid.UUID, book *model.Book, expected *model.Book, repo *repomock.MockBookerRepository) {
 			},
 			expectedStatusCode: 400,
 		},
 		{
-			name:          "Book not found",
+			name:          "Book Update service method throws an error: book not found",
 			inputStringID: "7a2f922c-073a-11eb-adc1-0242ac120006",
 			inputUUID:     uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120006"),
 			inputString:   `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description": "...","rating":99.99,"price":199.99,"inStock":true}`,
@@ -389,7 +388,7 @@ func TestBookHandler_Update(t *testing.T) {
 			expectedStatusCode: 404,
 		},
 		{
-			name:           "Service error",
+			name:           "Update method throws an error: internal service error",
 			inputStringID:  "7a2f922c-073a-11eb-adc1-0242ac120003",
 			inputUUID:      uuid.MustParse("7a2f922c-073a-11eb-adc1-0242ac120003"),
 			inputString:    `{"name":"Concurrency in Go: Tools and Techniques for Developers","dateOfIssue":"2017","author":"Katherine Cox-Buday","description":"...","rating":99.99,"price":199.99,"inStock":true}`,
@@ -473,7 +472,7 @@ func TestBookHandler_Delete(t *testing.T) {
 			expectedStatusCode: 200,
 		},
 		{
-			name:               "Invalid UUID ID",
+			name:               "Delete service method throws an error: invalid UUID ID",
 			inputStringID:      "wakldlkawdlklakwdlk",
 			expectedJSON:       nil,
 			expectedString:     `{"error": {"statusCode": 500, "message": "internal server error"}}`,

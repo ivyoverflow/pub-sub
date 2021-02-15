@@ -8,24 +8,24 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository"
+	"github.com/ivyoverflow/pub-sub/book/internal/storage"
 )
 
 // BookController implements all service methods for book.
 type BookController struct {
-	repo repository.Booker
+	repo storage.Booker
 	gen  Generator
 }
 
 // NewBookController returns a new configured BookController object.
-func NewBookController(repo repository.Booker, gen Generator) *BookController {
+func NewBookController(repo storage.Booker, gen Generator) *BookController {
 	return &BookController{repo, gen}
 }
 
 // Insert calls Insert repository method.
 func (s *BookController) Insert(ctx context.Context, book *model.Book) (*model.Book, error) {
 	if err := Validate(book); err != nil {
-		return nil, types.ErrorBadRequest
+		return nil, types.ErrorValidation
 	}
 
 	book.ID = s.gen.GenerateUUID()
@@ -41,7 +41,7 @@ func (s *BookController) Get(ctx context.Context, bookID uuid.UUID) (*model.Book
 // Update calls Update repository method.
 func (s *BookController) Update(ctx context.Context, bookID uuid.UUID, book *model.Book) (*model.Book, error) {
 	if err := Validate(book); err != nil {
-		return nil, types.ErrorBadRequest
+		return nil, types.ErrorValidation
 	}
 
 	return s.repo.Update(ctx, bookID, book)

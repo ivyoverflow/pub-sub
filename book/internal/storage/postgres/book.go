@@ -35,7 +35,7 @@ func (r *BookRepository) Insert(ctx context.Context, book *model.Book) (*model.B
 		case strings.Contains(err.Error(), "unique constraint"):
 			return nil, types.ErrorDuplicateValue
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
@@ -49,11 +49,11 @@ func (r *BookRepository) Get(ctx context.Context, bookID uuid.UUID) (*model.Book
 	row := r.pg.QueryRowContext(ctx, query, bookID)
 	if err := row.Scan(&book.ID, &book.Name, &book.DateOfIssue, &book.Author, &book.Description,
 		&book.Rating, &book.Price, &book.InStock); err != nil {
-		switch {
-		case err == sql.ErrNoRows:
+		switch err {
+		case sql.ErrNoRows:
 			return nil, types.ErrorNotFound
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
@@ -74,7 +74,7 @@ func (r *BookRepository) Update(ctx context.Context, bookID uuid.UUID, book *mod
 		case strings.Contains(err.Error(), "unique constraint"):
 			return nil, types.ErrorDuplicateValue
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 
@@ -88,11 +88,11 @@ func (r *BookRepository) Delete(ctx context.Context, bookID uuid.UUID) (*model.B
 	row := r.pg.QueryRowContext(ctx, query, bookID)
 	if err := row.Scan(&deletedBook.ID, &deletedBook.Name, &deletedBook.DateOfIssue, &deletedBook.Author, &deletedBook.Description,
 		&deletedBook.Rating, &deletedBook.Price, &deletedBook.InStock); err != nil {
-		switch {
-		case err == sql.ErrNoRows:
+		switch err {
+		case sql.ErrNoRows:
 			return nil, types.ErrorNotFound
 		default:
-			return nil, types.ErrorInternalServerError
+			return nil, err
 		}
 	}
 

@@ -11,8 +11,8 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/book/internal/lib/types"
 	"github.com/ivyoverflow/pub-sub/book/internal/model"
-	mock "github.com/ivyoverflow/pub-sub/book/internal/repository/mock"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	mock "github.com/ivyoverflow/pub-sub/book/internal/storage/mock"
 )
 
 func TestBookService_Insert(t *testing.T) {
@@ -79,7 +79,7 @@ func TestBookService_Insert(t *testing.T) {
 			},
 			expected:      nil,
 			mockBehavior:  func(ctx context.Context, book *model.Book, expected *model.Book, repo *mock.MockBookerRepository) {},
-			expectedError: types.ErrorBadRequest,
+			expectedError: types.ErrorValidation,
 		},
 	}
 
@@ -226,7 +226,7 @@ func TestBookService_Update(t *testing.T) {
 			},
 			expected:      nil,
 			mockBehavior:  func(context.Context, uuid.UUID, *model.Book, *model.Book, *mock.MockBookerRepository) {},
-			expectedError: types.ErrorBadRequest,
+			expectedError: types.ErrorValidation,
 		},
 	}
 

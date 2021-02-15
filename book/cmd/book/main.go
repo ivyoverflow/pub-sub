@@ -5,32 +5,30 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/ivyoverflow/pub-sub/book/internal/config"
 	"github.com/ivyoverflow/pub-sub/book/internal/handler"
-	"github.com/ivyoverflow/pub-sub/book/internal/repository/mongo"
 	"github.com/ivyoverflow/pub-sub/book/internal/server"
 	"github.com/ivyoverflow/pub-sub/book/internal/service"
+	"github.com/ivyoverflow/pub-sub/book/internal/storage/mongo"
 	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 func main() {
 	ctx := context.Background()
-	cfg := config.New()
 	log, err := logger.New()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	db, err := mongo.New(ctx, &cfg.Mongo)
+	db, err := mongo.New(ctx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	repo := mongo.NewBookRepository(db)
+	bookRepo := mongo.NewBookRepository(db)
 	gen := service.NewUUIDGenerator()
-	svc := service.NewBookController(repo, gen)
-	ctrl := handler.NewBookController(ctx, svc, log)
-	srv := server.New(&cfg.Server, ctrl)
+	bookSvc := service.NewBookController(bookRepo, gen)
+	bookHandl := handler.NewBookController(ctx, bookSvc, log)
+	srv := server.New(bookHandl)
 	if err = srv.Run(); err != nil {
 		log.Fatal(err.Error())
 	}
