@@ -46,7 +46,7 @@ func TestSubscribe_handler(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		svc := service.NewPublisherSubscriber()
+		svc := service.NewNotifier()
 		log, err := logger.New()
 		if err != nil {
 			t.Errorf("Logger initialization throws an error: %v", err)

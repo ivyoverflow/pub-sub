@@ -7,7 +7,7 @@ import (
 	"github.com/ivyoverflow/pub-sub/notifier/internal/service"
 )
 
-func TestPublisherSubscriber_service(t *testing.T) {
+func TestNotifier_service(t *testing.T) {
 	testCases := []struct {
 		name    string
 		topic   string
@@ -40,7 +40,7 @@ func TestPublisherSubscriber_service(t *testing.T) {
 		},
 	}
 
-	svc := service.NewPublisherSubscriber()
+	svc := service.NewNotifier()
 	for _, testCase := range testCases {
 		message := svc.Subscribe(testCase.topic)
 		svc.Publish(testCase.topic, testCase.message)
