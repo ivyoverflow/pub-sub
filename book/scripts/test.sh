@@ -1,2 +1,2 @@
-cd book/ && \
+cd Library/ && \
     go test -covermode=atomic ./...

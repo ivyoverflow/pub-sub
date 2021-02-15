@@ -2,15 +2,15 @@ package service
 
 import "github.com/google/uuid"
 
-// IDGenerator contains Generate() method.
-type IDGenerator struct{}
+// UUIDGenerator contains GenerateUUID() method.
+type UUIDGenerator struct{}
 
-// NewIDGenerator returns a new configured IDGenerator object.
-func NewIDGenerator() *IDGenerator {
-	return &IDGenerator{}
+// NewUUIDGenerator returns a new configured UUIDGenerator object.
+func NewUUIDGenerator() *UUIDGenerator {
+	return &UUIDGenerator{}
 }
 
-// Generate generates a new UUID ID.
-func (gen *IDGenerator) Generate() uuid.UUID {
+// GenerateUUID Generates a new UUID ID.
+func (gen *UUIDGenerator) GenerateUUID() uuid.UUID {
 	return uuid.New()
 }

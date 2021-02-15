@@ -12,11 +12,11 @@ import (
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
-	handl      *handler.Book
+	handl      *handler.BookController
 }
 
 // New returns a new configured Server object.
-func New(handl *handler.Book) *Server {
+func New(handl *handler.BookController) *Server {
 	cfg := NewConfig()
 
 	return &Server{

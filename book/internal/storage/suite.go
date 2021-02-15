@@ -15,11 +15,11 @@ import (
 
 // Suite contains all repository tests.
 type Suite struct {
-	repo BookI
+	repo Booker
 }
 
 // NewSuite returns a new configured Suite object.
-func NewSuite(repo BookI) *Suite {
+func NewSuite(repo Booker) *Suite {
 	return &Suite{repo}
 }
 
