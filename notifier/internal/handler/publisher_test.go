@@ -42,7 +42,7 @@ func TestPublish_handler(t *testing.T) {
 		},
 	}
 
-	svc := service.NewPublisherSubscriber()
+	svc := service.NewNotifier()
 	for _, testCase := range testCases {
 		log, err := logger.New()
 		if err != nil {

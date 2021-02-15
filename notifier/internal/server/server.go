@@ -31,7 +31,7 @@ func New(cfg *config.Config, log *logger.Logger) *Server {
 
 // Run configures routes and starts the server.
 func (server *Server) Run() error {
-	svc := service.NewPublisherSubscriber()
+	svc := service.NewNotifier()
 	publisherHandler := handler.NewPublisher(svc, server.log)
 	subscriberHandler := handler.NewSubscriber(svc, server.log)
 
