@@ -20,7 +20,7 @@ jobs:
       - run:
           name: "Init PostgreSQL migrations"
           command: |
-            migrate -path ./book/internal/storage/postgres/migrations -database postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable up
+            migrate -path ./api/internal/storage/postgres/migrations -database postgres://postgres:qwerty@localhost:5432/postgres?sslmode=disable up
       - run:
           name: "GolangCI installation"
           command: |
@@ -28,13 +28,13 @@ jobs:
       - run:
           name: "Run GolangCI"
           command: |
-            cd book/ && golangci-lint run -v --timeout 2m
-            cd ../server/ && golangci-lint run -v --timeout 2m
+            cd api/ && golangci-lint run -v --timeout 2m
+            cd ../notifier/ && golangci-lint run -v --timeout 2m
       - run:
           name: "Run unit tests"
           command: |
-            cd book/ && go test -covermode=atomic ./...
-            cd ../server/ && go test -covermode=atomic ./...
+            cd api/ && go test -covermode=atomic ./...
+            cd ../notifier/ && go test -covermode=atomic ./...
 workflows:
   version: 2
   build-workflow:

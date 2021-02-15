@@ -16,7 +16,7 @@ docker-compose up -d
 🧁  Run tests with the following commands:<br>
 To initialize PostgreSQL migrations:
 ```bash
-migrate -path ./book/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
+migrate -path ./api/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
 ```
 To run tests:
 ```bash
@@ -49,7 +49,7 @@ export PORT="<YOUR PORT>"
 ```
 >💡 WARNING: you also need to initialize PostgreSQL migrations:
 ```bash
-migrate -path ./book/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
+migrate -path ./api/internal/storage/postgres/migrations -database 'postgres://postgres:qwerty@0.0.0.0:5432/postgres?sslmode=disable' up
 ```
 ## 🚀 Contributors
 [👨🏻‍🎓 ivyoverflow](https://github.com/ivyoverflow) &&  [👨🏻‍🚀 kiryalovik](https://github.com/kiryalovik)

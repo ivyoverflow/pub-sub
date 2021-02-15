@@ -6,10 +6,12 @@ package mock_service
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
-	model "github.com/ivyoverflow/pub-sub/book/internal/model"
-	reflect "reflect"
+
+	model "github.com/ivyoverflow/pub-sub/api/internal/model"
 )
 
 // MockBookerService is a mock of Booker interface
