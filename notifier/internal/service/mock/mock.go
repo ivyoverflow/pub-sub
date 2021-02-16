@@ -5,55 +5,59 @@
 package mock_service
 
 import (
+	context "context"
+	redis "github.com/go-redis/redis/v8"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
 
-// MockPublisherSubscriberI is a mock of PublisherSubscriberI interface
-type MockPublisherSubscriberI struct {
+// MockNotifierService is a mock of Notifier interface
+type MockNotifierService struct {
 	ctrl     *gomock.Controller
-	recorder *MockPublisherSubscriberIMockRecorder
+	recorder *MockNotifierServiceMockRecorder
 }
 
-// MockPublisherSubscriberIMockRecorder is the mock recorder for MockPublisherSubscriberI
-type MockPublisherSubscriberIMockRecorder struct {
-	mock *MockPublisherSubscriberI
+// MockNotifierServiceMockRecorder is the mock recorder for MockNotifierService
+type MockNotifierServiceMockRecorder struct {
+	mock *MockNotifierService
 }
 
-// NewMockPublisherSubscriberI creates a new mock instance
-func NewMockPublisherSubscriberI(ctrl *gomock.Controller) *MockPublisherSubscriberI {
-	mock := &MockPublisherSubscriberI{ctrl: ctrl}
-	mock.recorder = &MockPublisherSubscriberIMockRecorder{mock}
+// NewMockNotifierService creates a new mock instance
+func NewMockNotifierService(ctrl *gomock.Controller) *MockNotifierService {
+	mock := &MockNotifierService{ctrl: ctrl}
+	mock.recorder = &MockNotifierServiceMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockPublisherSubscriberI) EXPECT() *MockPublisherSubscriberIMockRecorder {
+func (m *MockNotifierService) EXPECT() *MockNotifierServiceMockRecorder {
 	return m.recorder
 }
 
 // Publish mocks base method
-func (m *MockPublisherSubscriberI) Publish(topic string, message interface{}) {
+func (m *MockNotifierService) Publish(ctx context.Context, book string, message interface{}) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Publish", topic, message)
+	ret := m.ctrl.Call(m, "Publish", ctx, book, message)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Publish indicates an expected call of Publish
-func (mr *MockPublisherSubscriberIMockRecorder) Publish(topic, message interface{}) *gomock.Call {
+func (mr *MockNotifierServiceMockRecorder) Publish(ctx, book, message interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockPublisherSubscriberI)(nil).Publish), topic, message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockNotifierService)(nil).Publish), ctx, book, message)
 }
 
 // Subscribe mocks base method
-func (m *MockPublisherSubscriberI) Subscribe(topic string) chan interface{} {
+func (m *MockNotifierService) Subscribe(ctx context.Context, book string) <-chan *redis.Message {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Subscribe", topic)
-	ret0, _ := ret[0].(chan interface{})
+	ret := m.ctrl.Call(m, "Subscribe", ctx, book)
+	ret0, _ := ret[0].(<-chan *redis.Message)
 	return ret0
 }
 
 // Subscribe indicates an expected call of Subscribe
-func (mr *MockPublisherSubscriberIMockRecorder) Subscribe(topic interface{}) *gomock.Call {
+func (mr *MockNotifierServiceMockRecorder) Subscribe(ctx, book interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockPublisherSubscriberI)(nil).Subscribe), topic)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockNotifierService)(nil).Subscribe), ctx, book)
 }

@@ -9,35 +9,27 @@ import (
 
 	"github.com/ivyoverflow/pub-sub/notifier/internal/config"
 	"github.com/ivyoverflow/pub-sub/notifier/internal/handler"
-	"github.com/ivyoverflow/pub-sub/notifier/internal/service"
-	"github.com/ivyoverflow/pub-sub/platform/logger"
 )
 
 // Server represents application server.
 type Server struct {
 	httpServer *http.Server
-	log        *logger.Logger
 }
 
 // New returns a new configured Server object.
-func New(cfg *config.Config, log *logger.Logger) *Server {
+func New(cfg *config.ServerConfig) *Server {
 	return &Server{
 		httpServer: &http.Server{
 			Addr: fmt.Sprintf("%s:%s", cfg.Addr, cfg.Port),
 		},
-		log: log,
 	}
 }
 
 // Run configures routes and starts the server.
-func (server *Server) Run() error {
-	svc := service.NewNotifier()
-	publisherHandler := handler.NewPublisher(svc, server.log)
-	subscriberHandler := handler.NewSubscriber(svc, server.log)
-
+func (server *Server) Run(notificationCtrl *handler.Notification) error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/publish", publisherHandler.Publish)
-	mux.Handle("/subscribe", websocket.Handler(subscriberHandler.Subscribe))
+	mux.HandleFunc("/publish", notificationCtrl.Publish)
+	mux.Handle("/subscribe", websocket.Handler(notificationCtrl.Subscribe))
 
 	server.httpServer.Handler = mux
 
