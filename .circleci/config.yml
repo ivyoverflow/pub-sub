@@ -10,6 +10,7 @@ jobs:
       - image: circleci/postgres:9.6.20
         environment:
           POSTGRES_PASSWORD: qwerty
+      - image: circleci/redis:rc-alpine3.13
     working_directory: /go/src/github.com/ivyoverflow/pub-sub
     steps:
       - checkout

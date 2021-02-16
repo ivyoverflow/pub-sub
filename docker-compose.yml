@@ -19,3 +19,11 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=qwerty
+
+  redis:
+    restart: on-failure
+    image: redis:rc-alpine3.13
+    container_name: redis
+    ports: 
+      - "6379:6379"
+    
